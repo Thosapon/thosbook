@@ -1,0 +1,63 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Primitive Brand Colors
+        brand: {
+          blue: {
+            10: '#f2f7ff',
+            50: '#ced8e7',
+            100: '#9eb1cf',
+            400: '#0c3d88',
+            500: '#103874',
+            1000: '#041c43',
+          },
+          orange: {
+            400: '#fa680a',
+            500: '#cf5a0f',
+          },
+          grey: {
+            50: '#fbfbfb',
+            100: '#f4f4f4',
+            300: '#f0f0f0',
+            400: '#ececec',
+            500: '#ced0da',
+            600: '#9b9b9b',
+            700: '#737373',
+            800: '#4a4a4a',
+            900: '#363636',
+          },
+        },
+        // Mapped Semantic Tokens
+        surface: {
+          page: '#f0f0f0',        // Mapped.Surface.page
+          default: '#ececec',     // Mapped.Surface.default
+          highlight: '#f2f7ff',   // Mapped.Surface.highlight
+          primary: '#0c3d88',     // Mapped.Surface.action-primary
+          hover: '#fa680a',       // Mapped.Surface.action-primary-hover
+        },
+        text: {
+          heading: '#041c43',
+          body: '#363636',
+          muted: '#737373',
+          placeholder: '#9b9b9b',
+        },
+        border: {
+          default: '#ced0da',
+          dark: '#fbfbfb',
+        }
+      },
+      fontFamily: {
+        montserrat: ['Montserrat', 'sans-serif'],
+        prompt: ['Prompt', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+}

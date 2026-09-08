@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchBookmarkData();
 });
 
-// --- SIDEBAR HANDLER ---
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const navTexts = document.querySelectorAll('.nav-text');
@@ -40,7 +39,6 @@ function toggleSidebar() {
   }
 }
 
-// --- DATA FETCHING ---
 async function fetchCategories() {
   const navContainer = document.getElementById("category-nav");
   if (!navContainer) return;
@@ -95,7 +93,6 @@ async function fetchBookmarkData() {
   }
 }
 
-// --- CARDS RENDERER (ไม่มีปุ่ม Edit/Delete สำหรับ Viewer) ---
 function renderBookmarks(data) {
   const container = document.getElementById('cards-container');
   if (!container) return;
@@ -158,7 +155,6 @@ function renderBookmarks(data) {
   lucide.createIcons();
 }
 
-// --- SEARCH & FILTER ---
 function filterByCategory(catId, element) {
   currentCategory = catId;
   document.querySelectorAll('.category-btn').forEach(btn => {
@@ -198,7 +194,6 @@ function populateCategoryDropdown(categories) {
   });
 }
 
-// --- IMAGE COMPRESSION & PREVIEW ---
 function compressImage(file, maxWidth = 1000, quality = 0.7) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -240,7 +235,6 @@ async function previewAddImage(event) {
   }
 }
 
-// --- LIGHTBOX PREVIEW ---
 function openImageLightbox(imageUrl, title) {
   if (!imageUrl) return;
   const modal = document.getElementById("image-lightbox-modal");
@@ -264,8 +258,11 @@ function showErrorNotification(title, message) {
 
 function closeNotifyModal() { document.getElementById("notify-modal").classList.add("hidden"); }
 
-// --- ADD CATEGORY HANDLER ---
 function openCategoryModal() {
+  document.getElementById("cat-id").value = "";
+  document.getElementById("cat-name").value = "";
+  document.getElementById("cat-color").value = "#0c3d88";
+  document.getElementById("cat-modal-title").innerText = "New Category";
   document.getElementById("category-modal").classList.remove("hidden");
 }
 
@@ -279,10 +276,14 @@ async function handleSaveCategory(e) {
   const saveBtn = document.getElementById("save-cat-btn");
   saveBtn.disabled = true;
 
+  const catId = document.getElementById("cat-id").value;
+  const isEdit = Boolean(catId);
+
   const payload = {
-    action: "addCategory",
+    action: isEdit ? "updateCategory" : "addCategory",
+    id: isEdit ? catId : undefined,
     data: {
-      id: "cat_" + Date.now(),
+      id: isEdit ? catId : "cat_" + Date.now(),
       name: document.getElementById("cat-name").value,
       color: document.getElementById("cat-color").value
     }
@@ -308,7 +309,6 @@ async function handleSaveCategory(e) {
   }
 }
 
-// --- ADD BOOKMARK HANDLER ---
 function openAddModal() {
   document.getElementById("add-modal").classList.remove("hidden");
   populateCategoryDropdown(cachedCategories);

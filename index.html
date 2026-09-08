@@ -4,11 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thosbook - Login</title>
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -18,8 +24,8 @@
               navy: '#0c3d88',
               darkNavy: '#041c43',
               footerNavy: '#02132e',
+              accentOrange: '#fee1ce',
               pageBg: '#e9ecef',
-              placeholder: '#9b9b9b',
             }
           },
           fontFamily: {
@@ -31,121 +37,161 @@
     }
   </script>
 </head>
+
 <body class="bg-brand-pageBg font-montserrat min-h-screen flex flex-col justify-between">
 
-  <header class="bg-brand-navy h-28 w-full shadow-md"></header>
+  <!-- HEADER NAVBAR -->
+  <header class="bg-brand-navy text-white shadow-md">
+    <div class="max-w-[1600px] w-full mx-auto px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="star" class="w-5 h-5 fill-current text-white"></i>
+        <span class="text-2xl font-bold tracking-tight">Thosbook</span>
+      </div>
+    </div>
+  </header>
 
+  <!-- MAIN LOGIN WORKSPACE -->
   <main class="flex-1 flex items-center justify-center p-6">
-    <div class="w-full max-w-sm space-y-6 text-center">
-      <h1 class="text-4xl font-bold text-brand-darkNavy tracking-tight">Login</h1>
+    <div class="bg-white rounded-3xl p-8 shadow-xl max-w-sm w-full border border-gray-100 space-y-6">
+      
+      <div class="text-center space-y-1">
+        <h1 class="text-2xl font-bold text-brand-darkNavy tracking-tight">Login</h1>
+        <p class="text-xs text-gray-400">กรอกข้อมูลเพื่อเข้าสู่ระบบ Thosbook</p>
+      </div>
 
+      <!-- ERROR ALERT -->
+      <div id="error-alert" class="hidden bg-red-50 text-red-600 text-xs font-semibold p-3.5 rounded-xl border border-red-100 flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+        <span id="error-message">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
+      </div>
+
+      <!-- LOGIN FORM -->
       <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Username</label>
           <input 
             type="text" 
-            id="username"
-            placeholder="User" 
-            required
-            class="w-full bg-white text-brand-darkNavy placeholder-brand-placeholder text-sm rounded-lg px-4 py-3 border-none focus:outline-none focus:ring-2 focus:ring-brand-navy shadow-sm"
+            id="username" 
+            required 
+            placeholder="Username" 
+            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-darkNavy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-navy"
           />
         </div>
 
-        <div class="relative">
-          <input 
-            type="password" 
-            id="password"
-            placeholder="Password" 
-            required
-            class="w-full bg-white text-brand-darkNavy placeholder-brand-placeholder text-sm rounded-lg px-4 py-3 border-none focus:outline-none focus:ring-2 focus:ring-brand-navy shadow-sm pr-10"
-          />
-          <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-brand-darkNavy hover:text-brand-navy">
-            <i data-lucide="eye" id="eye-icon" class="w-4 h-4"></i>
-          </button>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Password</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="password" 
+              required 
+              placeholder="Password" 
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-brand-darkNavy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-navy"
+            />
+            <button 
+              type="button" 
+              onclick="togglePasswordVisibility()" 
+              class="absolute right-3 top-2.5 text-gray-400 hover:text-brand-navy focus:outline-none transition-colors"
+              title="Toggle Password Visibility"
+            >
+              <i data-lucide="eye" id="toggle-password-icon" class="w-4 h-4"></i>
+            </button>
+          </div>
         </div>
-
-        <div id="error-message" class="text-xs text-red-500 font-medium hidden"></div>
 
         <button 
           type="submit" 
-          id="submit-btn"
-          class="w-full bg-brand-navy hover:bg-blue-900 text-white font-semibold py-3 px-4 rounded-lg text-sm shadow-md transition-colors"
+          id="login-btn"
+          class="w-full bg-brand-navy hover:bg-blue-900 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition-colors mt-2"
         >
           Login
         </button>
       </form>
 
-      <div class="pt-2">
-        <a href="#" class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-darkNavy hover:underline">
-          <i data-lucide="info" class="w-3.5 h-3.5"></i>
-          <span>Forgot Password</span>
-        </a>
-      </div>
     </div>
   </main>
 
-  <footer class="bg-brand-footerNavy h-36 w-full"></footer>
+  <!-- FOOTER -->
+  <footer class="bg-brand-footerNavy h-24 mt-auto"></footer>
 
+  <!-- SCRIPT -->
+  <script src="config.js"></script>
   <script>
-    lucide.createIcons();
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      
+      const session = localStorage.getItem("thosbook_user");
+      if (session) {
+        window.location.href = "dashboard.html";
+      }
+    });
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxZxauJNgMIIbQI4vzjv80P4s64OaqXZxsGLHYNzAWyY6xksy-Vh1L5S1Irm7Kv96oL/exec"; // วาง URL เดียวกันกับหน้า Dashboard
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById("password");
+      const toggleIcon = document.getElementById("toggle-password-icon");
 
-    // เช็กว่าถ้า Login แล้วให้ไป Dashboard ทันที
-    if (localStorage.getItem("thosbook_user")) {
-      window.location.href = "dashboard.html";
-    }
-
-    function togglePassword() {
-      const passInput = document.getElementById("password");
-      const eyeIcon = document.getElementById("eye-icon");
-      if (passInput.type === "password") {
-        passInput.type = "text";
-        eyeIcon.setAttribute("data-lucide", "eye-off");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleIcon.setAttribute("data-lucide", "eye-off");
       } else {
-        passInput.type = "password";
-        eyeIcon.setAttribute("data-lucide", "eye");
+        passwordInput.type = "password";
+        toggleIcon.setAttribute("data-lucide", "eye");
       }
       lucide.createIcons();
     }
 
     async function handleLogin(e) {
       e.preventDefault();
-      const userVal = document.getElementById("username").value;
-      const passVal = document.getElementById("password").value;
-      const errorDiv = document.getElementById("error-message");
-      const submitBtn = document.getElementById("submit-btn");
+      
+      const btn = document.getElementById("login-btn");
+      const errorAlert = document.getElementById("error-alert");
+      const errorMsg = document.getElementById("error-message");
 
-      errorDiv.classList.add("hidden");
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Authenticating...";
+      const usernameInput = document.getElementById("username").value.trim();
+      const passwordInput = document.getElementById("password").value.trim();
+
+      errorAlert.classList.add("hidden");
+      btn.disabled = true;
+      btn.innerText = "กำลังเข้าสู่ระบบ...";
+
+      const payload = {
+        action: "login",
+        username: usernameInput,
+        password: passwordInput
+      };
 
       try {
-        const res = await fetch(GAS_API_URL, {
+        const response = await fetch(GAS_API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "login",
-            username: userVal,
-            password: passVal
-          })
+          body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        const result = await response.json();
 
-        if (data.status === "success") {
-          // บันทึก Session ลง LocalStorage
-          localStorage.setItem("thosbook_user", JSON.stringify(data.user));
+        if (result.status === "success") {
+          const userData = {
+            id: result.user.id || "usr_01",
+            username: result.user.username || usernameInput,
+            name: result.user.name || result.user.username || usernameInput,
+            role: (result.user.role || (usernameInput.toLowerCase() === 'admin' ? 'admin' : 'viewer')).toLowerCase()
+          };
+
+          localStorage.setItem("thosbook_user", JSON.stringify(userData));
           window.location.href = "dashboard.html";
         } else {
-          errorDiv.innerText = data.message || "Invalid credentials";
-          errorDiv.classList.remove("hidden");
+          errorMsg.innerText = result.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
+          errorAlert.classList.remove("hidden");
+          lucide.createIcons();
         }
       } catch (err) {
-        errorDiv.innerText = "Connection error. Please try again.";
-        errorDiv.classList.remove("hidden");
+        console.error("Login Error:", err);
+        errorMsg.innerText = "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง";
+        errorAlert.classList.remove("hidden");
+        lucide.createIcons();
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Login";
+        btn.disabled = false;
+        btn.innerText = "Login";
       }
     }
   </script>

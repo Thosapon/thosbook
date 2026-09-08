@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thosbook - Admin Management</title>
+
+  <!-- 3. Admin Role Guard Check (เห็นได้เฉพาะ role = admin เท่านั้น) -->
+  <script>
+    const userSession = JSON.parse(localStorage.getItem("thosbook_user") || "null");
+    if (!userSession || userSession.role !== "admin") {
+      alert("คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (สำหรับ Admin เท่านั้น)");
+      window.location.href = "dashboard.html";
+    }
+
+    function handleLogout() {
+      localStorage.removeItem("thosbook_user");
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { navy: '#0c3d88', darkNavy: '#041c43', footerNavy: '#02132e', accentOrange: '#fee1ce', pageBg: '#e9ecef' }
+          },
+          fontFamily: { montserrat: ['Montserrat', 'sans-serif'], prompt: ['Prompt', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-brand-pageBg font-montserrat min-h-screen flex flex-col">
+
+  <!-- NAVBAR -->
+  <header class="bg-brand-darkNavy text-white shadow-md">
+    <div class="max-w-[1600px] w-full mx-auto px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="dashboard.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          <span class="text-xl font-bold tracking-tight">Back to Dashboard</span>
+        </a>
+        <span class="bg-red-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Admin Panel</span>
+      </div>
+
+      <button onclick="handleLogout()" class="flex items-center gap-2 text-sm font-medium hover:text-blue-200 transition-colors">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+        <span>Log out</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-8 py-8 space-y-10">
+    
+    <!-- 1. CATEGORY MANAGEMENT (รูปแบบ Card พร้อมปุ่ม แก้ไข/ลบ) -->
+    <section class="space-y-4">
+      <div class="border-b border-gray-200 pb-3">
+        <h2 class="text-xl font-bold text-brand-darkNavy">Category Management</h2>
+        <p class="text-xs text-gray-500 mt-1">จัดการ แก้ไข และลบหมวดหมู่ทั้งหมดในระบบ</p>
+      </div>
+
+      <div id="admin-category-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="col-span-full text-center py-8 text-gray-400">กำลังโหลดหมวดหมู่...</div>
+      </div>
+    </section>
+
+    <!-- 1. BOOKMARK MANAGEMENT (รูปแบบ Card พร้อมปุ่ม แก้ไข/ลบ) -->
+    <section class="space-y-4">
+      <div class="border-b border-gray-200 pb-3">
+        <h2 class="text-xl font-bold text-brand-darkNavy">Bookmark Management</h2>
+        <p class="text-xs text-gray-500 mt-1">จัดการ แก้ไข และลบข้อมูล Bookmark ทั้งหมดในระบบ</p>
+      </div>
+
+      <div id="admin-bookmark-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="col-span-full text-center py-8 text-gray-400">กำลังโหลด Bookmarks...</div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-brand-footerNavy h-24 mt-auto"></footer>
+
+  <!-- EDIT BOOKMARK MODAL -->
+  <div id="edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+        <h3 class="text-lg font-bold text-brand-darkNavy">Edit Bookmark</h3>
+        <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="edit-bookmark-form" onsubmit="handleUpdateBookmark(event)" class="space-y-4">
+        <input type="hidden" id="edit-bm-id" />
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Type</label>
+          <select id="edit-bm-type" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy">
+            <option value="link">Link</option>
+            <option value="video">Video</option>
+            <option value="text">Text / Note</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Category</label>
+          <select id="edit-bm-category" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Title</label>
+          <input type="text" id="edit-bm-title" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Link (ถ้ามี)</label>
+          <input type="url" id="edit-bm-url" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Content / Note</label>
+          <textarea id="edit-bm-content" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy"></textarea>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeEditModal()" class="w-1/2 bg-gray-100 hover:bg-gray-200 text-brand-darkNavy font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancel</button>
+          <button type="submit" id="update-bm-btn" class="w-1/2 bg-brand-navy hover:bg-blue-900 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition-colors">Update Bookmark</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT CATEGORY MODAL -->
+  <div id="category-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-gray-100 space-y-4">
+      <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+        <h3 id="cat-modal-title" class="text-lg font-bold text-brand-darkNavy">Edit Category</h3>
+        <button onclick="closeCategoryModal()" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="category-form" onsubmit="handleSaveCategory(event)" class="space-y-4">
+        <input type="hidden" id="cat-id" />
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Category Name</label>
+          <input type="text" id="cat-name" required placeholder="ชื่อหมวดหมู่..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Icon Color</label>
+          <div class="flex items-center gap-3">
+            <input type="color" id="cat-color" value="#0c3d88" class="w-10 h-10 rounded-xl border-none cursor-pointer bg-transparent" />
+            <span class="text-xs text-gray-500">เลือกสีสัญลักษณ์ประจำหมวดหมู่</span>
+          </div>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeCategoryModal()" class="w-1/2 bg-gray-100 hover:bg-gray-200 text-brand-darkNavy font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancel</button>
+          <button type="submit" id="save-cat-btn" class="w-1/2 bg-brand-navy hover:bg-blue-900 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition-colors">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

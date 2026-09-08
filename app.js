@@ -2,10 +2,7 @@ let isCollapsed = false;
 let allBookmarks = [];
 let cachedCategories = [];
 let currentCategory = 'all';
-let pendingDeleteId = null;
-let pendingDeleteCatId = null;
 let uploadedImageBase64 = "";
-let editUploadedImageBase64 = "";
 
 document.addEventListener("DOMContentLoaded", () => {
   lucide.createIcons();
@@ -65,22 +62,13 @@ async function fetchCategories() {
     let categoriesHtml = "";
     if (Array.isArray(cachedCategories)) {
       cachedCategories.forEach((cat) => {
-        const catJson = JSON.stringify(cat).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
         categoriesHtml += `
-          <div class="group/cat flex items-center justify-between rounded-xl hover:bg-gray-50 pr-2">
+          <div class="flex items-center justify-between rounded-xl hover:bg-gray-50 pr-2">
             <button onclick="filterByCategory('${cat.id}', this)" 
                class="category-btn nav-item flex-1 flex items-center gap-3 text-brand-darkNavy px-4 py-2.5 font-medium text-sm transition-colors text-left">
               <i data-lucide="folder" class="w-5 h-5 shrink-0" style="color: ${cat.color || 'inherit'}"></i>
               <span class="nav-text truncate">${cat.name}</span>
             </button>
-            <div class="hidden group-hover/cat:flex items-center gap-1 nav-text">
-              <button onclick='openCategoryModal(${catJson})' class="p-1 text-gray-400 hover:text-brand-navy rounded-md" title="Edit Category">
-                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="handleDeleteCategory('${cat.id}')" class="p-1 text-gray-400 hover:text-red-500 rounded-md" title="Delete Category">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
           </div>
         `;
       });
@@ -107,7 +95,7 @@ async function fetchBookmarkData() {
   }
 }
 
-// --- CARDS RENDERER ---
+// --- CARDS RENDERER (ไม่มีปุ่ม Edit/Delete สำหรับ Viewer) ---
 function renderBookmarks(data) {
   const container = document.getElementById('cards-container');
   if (!container) return;
@@ -119,19 +107,7 @@ function renderBookmarks(data) {
 
   container.innerHTML = "";
   data.forEach((item) => {
-    const itemJson = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-
-    // แปลง Label Text ตามเงื่อนไขข้อ 2
-    let typeLabel = "Link";
-    if (item.type === "text") {
-      typeLabel = "Text / Note";
-    } else if (item.type === "video") {
-      typeLabel = "Video";
-    } else if (item.type === "link") {
-      typeLabel = "Link";
-    } else if (item.type) {
-      typeLabel = item.type;
-    }
+    let typeLabel = item.type === "text" ? "Text / Note" : (item.type === "video" ? "Video" : "Link");
 
     const imageHtml = item.image_url ? `
       <div class="relative group/img mb-3 overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
@@ -166,14 +142,6 @@ function renderBookmarks(data) {
             <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-brand-accentOrange text-brand-darkNavy inline-block">
               ${typeLabel}
             </span>
-            <div class="flex items-center gap-1">
-              <button onclick='openEditModal(${itemJson})' class="p-1.5 text-gray-400 hover:text-brand-navy rounded-lg hover:bg-gray-100 transition-colors" title="Edit">
-                <i data-lucide="pencil" class="w-4 h-4"></i>
-              </button>
-              <button onclick="handleDeleteBookmark('${item.id}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 transition-colors" title="Delete">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
           </div>
           ${imageHtml}
           <h3 class="text-base font-semibold text-brand-darkNavy line-clamp-2">${item.title || 'ไม่มีหัวข้อ'}</h3>
@@ -190,7 +158,7 @@ function renderBookmarks(data) {
   lucide.createIcons();
 }
 
-// --- SEARCH & FILTER (ปรับปรุงข้อ 1) ---
+// --- SEARCH & FILTER ---
 function filterByCategory(catId, element) {
   currentCategory = catId;
   document.querySelectorAll('.category-btn').forEach(btn => {
@@ -204,24 +172,18 @@ function filterByCategory(catId, element) {
   applyFilters();
 }
 
-function handleSearch() { 
-  applyFilters(); 
-}
+function handleSearch() { applyFilters(); }
 
 function applyFilters() {
   const query = document.getElementById('search-input').value.trim().toLowerCase();
 
   const filtered = allBookmarks.filter(item => {
     const matchCategory = (currentCategory === 'all') || (item.category_id === currentCategory);
-    
-    // Search ใน title, content, และ url
     const matchTitle = item.title && item.title.toLowerCase().includes(query);
     const matchContent = item.content && item.content.toLowerCase().includes(query);
     const matchUrl = item.url && item.url.toLowerCase().includes(query);
     
-    const matchSearch = query === "" || matchTitle || matchContent || matchUrl;
-
-    return matchCategory && matchSearch;
+    return matchCategory && (query === "" || matchTitle || matchContent || matchUrl);
   });
 
   renderBookmarks(filtered);
@@ -248,12 +210,10 @@ function compressImage(file, maxWidth = 1000, quality = 0.7) {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
         }
-
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
@@ -269,7 +229,6 @@ function compressImage(file, maxWidth = 1000, quality = 0.7) {
 async function previewAddImage(event) {
   const file = event.target.files[0];
   if (!file) return;
-
   try {
     uploadedImageBase64 = await compressImage(file, 1000, 0.7);
     const previewImg = document.getElementById("image-preview");
@@ -277,22 +236,7 @@ async function previewAddImage(event) {
     previewImg.src = uploadedImageBase64;
     container.classList.remove("hidden");
   } catch (err) {
-    console.error("Error compressing image:", err);
-  }
-}
-
-async function previewEditImage(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  try {
-    editUploadedImageBase64 = await compressImage(file, 1000, 0.7);
-    const previewImg = document.getElementById("edit-image-preview");
-    const container = document.getElementById("edit-image-preview-container");
-    previewImg.src = editUploadedImageBase64;
-    container.classList.remove("hidden");
-  } catch (err) {
-    console.error("Error compressing image:", err);
+    console.error(err);
   }
 }
 
@@ -300,62 +244,29 @@ async function previewEditImage(event) {
 function openImageLightbox(imageUrl, title) {
   if (!imageUrl) return;
   const modal = document.getElementById("image-lightbox-modal");
-  const img = document.getElementById("lightbox-img");
-  const titleEl = document.getElementById("lightbox-title");
-  const downloadBtn = document.getElementById("lightbox-download-btn");
-
-  img.src = imageUrl;
-  titleEl.innerText = title || "Image Preview";
-  downloadBtn.href = imageUrl;
-  downloadBtn.setAttribute("download", (title || 'bookmark-image').replace(/[^a-zA-Z0-9]/g, '_') + '.jpg');
-
+  document.getElementById("lightbox-img").src = imageUrl;
+  document.getElementById("lightbox-title").innerText = title || "Image Preview";
+  document.getElementById("lightbox-download-btn").href = imageUrl;
   modal.classList.remove("hidden");
   lucide.createIcons();
-}
-
-function openLightboxFromPreview(imgElementId, defaultTitle) {
-  const imgSrc = document.getElementById(imgElementId).src;
-  if (imgSrc) openImageLightbox(imgSrc, defaultTitle);
 }
 
 function closeImageLightbox(e) {
   if (e && e.target !== e.currentTarget && !e.target.closest('button')) return;
   document.getElementById("image-lightbox-modal").classList.add("hidden");
-  document.getElementById("lightbox-img").src = "";
 }
 
-// --- ERROR NOTIFICATION ONLY ---
 function showErrorNotification(title, message) {
-  const modal = document.getElementById("notify-modal");
   document.getElementById("notify-title").innerText = title;
   document.getElementById("notify-message").innerText = message;
-  lucide.createIcons();
-  modal.classList.remove("hidden");
+  document.getElementById("notify-modal").classList.remove("hidden");
 }
 
 function closeNotifyModal() { document.getElementById("notify-modal").classList.add("hidden"); }
 
-// --- CATEGORY MODAL HANDLERS ---
-function openCategoryModal(cat = null) {
-  const modal = document.getElementById("category-modal");
-  const title = document.getElementById("cat-modal-title");
-  const catIdInput = document.getElementById("cat-id");
-  const catNameInput = document.getElementById("cat-name");
-  const catColorInput = document.getElementById("cat-color");
-
-  if (cat) {
-    title.innerText = "Edit Category";
-    catIdInput.value = cat.id;
-    catNameInput.value = cat.name;
-    catColorInput.value = cat.color || "#0c3d88";
-  } else {
-    title.innerText = "New Category";
-    catIdInput.value = "";
-    catNameInput.value = "";
-    catColorInput.value = "#0c3d88";
-  }
-
-  modal.classList.remove("hidden");
+// --- ADD CATEGORY HANDLER ---
+function openCategoryModal() {
+  document.getElementById("category-modal").classList.remove("hidden");
 }
 
 function closeCategoryModal() {
@@ -367,16 +278,11 @@ async function handleSaveCategory(e) {
   e.preventDefault();
   const saveBtn = document.getElementById("save-cat-btn");
   saveBtn.disabled = true;
-  saveBtn.innerText = "Saving...";
-
-  const catId = document.getElementById("cat-id").value;
-  const isEdit = Boolean(catId);
 
   const payload = {
-    action: isEdit ? "updateCategory" : "addCategory",
-    id: catId || undefined,
+    action: "addCategory",
     data: {
-      id: catId || "cat_" + Date.now(),
+      id: "cat_" + Date.now(),
       name: document.getElementById("cat-name").value,
       color: document.getElementById("cat-color").value
     }
@@ -388,72 +294,21 @@ async function handleSaveCategory(e) {
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload)
     });
-
     const result = await res.json();
     if (result.status === "success") {
       closeCategoryModal();
       fetchCategories();
     } else {
-      showErrorNotification("Error", result.message || "เกิดข้อผิดพลาดในการบันทึกหมวดหมู่");
+      showErrorNotification("Error", result.message);
     }
   } catch (err) {
-    showErrorNotification("Connection Error", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    showErrorNotification("Connection Error", "เชื่อมต่อล้มเหลว");
   } finally {
     saveBtn.disabled = false;
-    saveBtn.innerText = "Save Category";
   }
 }
 
-function handleDeleteCategory(id) {
-  pendingDeleteCatId = id;
-  const btn = document.getElementById("confirm-delete-cat-btn");
-  btn.onclick = executeDeleteCategory;
-  document.getElementById("delete-cat-modal").classList.remove("hidden");
-}
-
-function closeDeleteCatModal() {
-  pendingDeleteCatId = null;
-  document.getElementById("delete-cat-modal").classList.add("hidden");
-}
-
-async function executeDeleteCategory() {
-  if (!pendingDeleteCatId) return;
-
-  const btn = document.getElementById("confirm-delete-cat-btn");
-  btn.disabled = true;
-  btn.innerText = "Deleting...";
-
-  try {
-    const res = await fetch(GAS_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({
-        action: "deleteCategory",
-        id: pendingDeleteCatId
-      })
-    });
-
-    const result = await res.json();
-    closeDeleteCatModal();
-
-    if (result.status === "success") {
-      fetchCategories();
-      if (currentCategory === pendingDeleteCatId) {
-        filterByCategory('all');
-      }
-    } else {
-      showErrorNotification("Error", result.message || "เกิดข้อผิดพลาดในการลบหมวดหมู่");
-    }
-  } catch (err) {
-    closeDeleteCatModal();
-    showErrorNotification("Connection Error", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
-  } finally {
-    btn.disabled = false;
-    btn.innerText = "Delete";
-  }
-}
-
-// --- BOOKMARK MODAL HANDLERS ---
+// --- ADD BOOKMARK HANDLER ---
 function openAddModal() {
   document.getElementById("add-modal").classList.remove("hidden");
   populateCategoryDropdown(cachedCategories);
@@ -470,7 +325,6 @@ async function handleAddBookmark(e) {
   e.preventDefault();
   const saveBtn = document.getElementById("save-bm-btn");
   saveBtn.disabled = true;
-  saveBtn.innerText = "Saving...";
 
   const payload = {
     action: "addBookmark",
@@ -491,144 +345,16 @@ async function handleAddBookmark(e) {
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload)
     });
-
     const result = await res.json();
-    
     if (result.status === "success") {
       closeAddModal();
       fetchBookmarkData();
     } else {
-      showErrorNotification("Error", result.message || "เกิดข้อผิดพลาดในการบันทึก");
+      showErrorNotification("Error", result.message);
     }
   } catch (err) {
-    showErrorNotification("Connection Error", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    showErrorNotification("Connection Error", "เชื่อมต่อล้มเหลว");
   } finally {
     saveBtn.disabled = false;
-    saveBtn.innerText = "Save Bookmark";
-  }
-}
-
-function openEditModal(item) {
-  document.getElementById("edit-bm-id").value = item.id;
-  document.getElementById("edit-bm-type").value = item.type || "link";
-  document.getElementById("edit-bm-title").value = item.title || "";
-  document.getElementById("edit-bm-url").value = item.url || "";
-  document.getElementById("edit-bm-content").value = item.content || "";
-
-  const catSelect = document.getElementById("edit-bm-category");
-  catSelect.innerHTML = "";
-  cachedCategories.forEach(cat => {
-    const selected = cat.id === item.category_id ? "selected" : "";
-    catSelect.innerHTML += `<option value="${cat.id}" ${selected}>${cat.name}</option>`;
-  });
-
-  const previewImg = document.getElementById("edit-image-preview");
-  const container = document.getElementById("edit-image-preview-container");
-  
-  if (item.image_url) {
-    editUploadedImageBase64 = item.image_url;
-    previewImg.src = item.image_url;
-    container.classList.remove("hidden");
-  } else {
-    editUploadedImageBase64 = "";
-    previewImg.src = "";
-    container.classList.add("hidden");
-  }
-
-  document.getElementById("edit-modal").classList.remove("hidden");
-}
-
-function closeEditModal() {
-  document.getElementById("edit-modal").classList.add("hidden");
-  document.getElementById("edit-bookmark-form").reset();
-  document.getElementById("edit-image-preview-container").classList.add("hidden");
-  editUploadedImageBase64 = "";
-}
-
-async function handleUpdateBookmark(e) {
-  e.preventDefault();
-  const btn = document.getElementById("update-bm-btn");
-  btn.disabled = true;
-  btn.innerText = "Updating...";
-
-  const id = document.getElementById("edit-bm-id").value;
-  const payload = {
-    action: "updateBookmark",
-    id: id,
-    data: {
-      category_id: document.getElementById("edit-bm-category").value,
-      type: document.getElementById("edit-bm-type").value,
-      title: document.getElementById("edit-bm-title").value,
-      url: document.getElementById("edit-bm-url").value,
-      content: document.getElementById("edit-bm-content").value,
-      image_url: editUploadedImageBase64
-    }
-  };
-
-  try {
-    const res = await fetch(GAS_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json();
-    
-    if (result.status === "success") {
-      closeEditModal();
-      fetchBookmarkData();
-    } else {
-      showErrorNotification("Error", result.message || "เกิดข้อผิดพลาดในการอัปเดต");
-    }
-  } catch (err) {
-    showErrorNotification("Connection Error", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
-  } finally {
-    btn.disabled = false;
-    btn.innerText = "Update Bookmark";
-  }
-}
-
-function handleDeleteBookmark(id) {
-  pendingDeleteId = id;
-  const deleteBtn = document.getElementById("confirm-delete-btn");
-  deleteBtn.onclick = executeDelete;
-  document.getElementById("delete-modal").classList.remove("hidden");
-}
-
-function closeDeleteModal() {
-  pendingDeleteId = null;
-  document.getElementById("delete-modal").classList.add("hidden");
-}
-
-async function executeDelete() {
-  if (!pendingDeleteId) return;
-
-  const btn = document.getElementById("confirm-delete-btn");
-  btn.disabled = true;
-  btn.innerText = "Deleting...";
-
-  try {
-    const res = await fetch(GAS_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({
-        action: "deleteBookmark",
-        id: pendingDeleteId
-      })
-    });
-    
-    const result = await res.json();
-    closeDeleteModal();
-
-    if (result.status === "success") {
-      fetchBookmarkData();
-    } else {
-      showErrorNotification("Error", result.message || "เกิดข้อผิดพลาดในการลบ");
-    }
-  } catch (err) {
-    closeDeleteModal();
-    showErrorNotification("Connection Error", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
-  } finally {
-    btn.disabled = false;
-    btn.innerText = "Delete";
   }
 }

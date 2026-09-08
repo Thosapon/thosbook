@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thosbook - Dashboard</title>
 
-  <!-- Auth Guard Check -->
+  <!-- Device Redirection Guard (สลับไปหน้า m_dashboard.html เมื่อเปิดบนมือถือ) -->
   <script>
+    if (window.innerWidth < 768) {
+      window.location.replace("m_dashboard.html");
+    }
+
     const userSession = JSON.parse(localStorage.getItem("thosbook_user") || "null");
     if (!userSession) {
       window.location.href = "login.html";
@@ -14,7 +18,7 @@
 
     function handleLogout() {
       localStorage.removeItem("thosbook_user");
-      window.location.href = "index.html";
+      window.location.href = "login.html";
     }
   </script>
 
@@ -118,7 +122,6 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 space-y-4">
-      <!-- ลบปุ่ม New Category ออก คงเหลือไว้เฉพาะ New Bookmark -->
       <div class="flex justify-end">
         <button onclick="openAddModal()" class="flex items-center gap-2 bg-brand-navy hover:bg-blue-900 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-colors">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -254,34 +257,8 @@
     </div>
   </div>
 
-  <div id="image-lightbox-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center hidden p-4" onclick="closeImageLightbox(event)">
-    <div class="relative max-w-4xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
-        <h3 id="lightbox-title" class="text-base font-bold text-brand-darkNavy truncate pr-4">Image Preview</h3>
-        <div class="flex items-center gap-2">
-          <a id="lightbox-download-btn" href="#" download="bookmark-cover.jpg" class="flex items-center gap-1.5 bg-brand-navy hover:bg-blue-900 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors">
-            <i data-lucide="download" class="w-4 h-4"></i><span>Download</span>
-          </a>
-          <button onclick="closeImageLightbox()" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-      </div>
-      <div class="p-4 flex-1 flex items-center justify-center bg-gray-900/5 overflow-auto">
-        <img id="lightbox-img" src="" alt="Full Preview" class="max-h-[70vh] w-auto max-w-full object-contain rounded-lg shadow-sm" />
-      </div>
-    </div>
-  </div>
-
-  <div id="notify-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-xs shadow-xl border border-gray-100 text-center space-y-3">
-      <div id="notify-icon-bg" class="w-10 h-10 rounded-full flex items-center justify-center mx-auto bg-red-100 text-red-600"><i data-lucide="alert-circle" class="w-5 h-5"></i></div>
-      <h3 id="notify-title" class="text-base font-bold text-brand-darkNavy"></h3>
-      <p id="notify-message" class="text-xs text-gray-500"></p>
-      <button type="button" onclick="closeNotifyModal()" class="w-full bg-brand-navy hover:bg-blue-900 text-white font-semibold py-2 rounded-xl text-sm transition-colors">OK</button>
-    </div>
-  </div>
-
   <!-- External Script Loaders -->
-  <script src="config.js"></script>
+  <script src="js/core/config.js"></script>
   <script src="app.js"></script>
   <script src="script.js"></script>
 </body>

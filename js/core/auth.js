@@ -32,20 +32,20 @@ const ThosbookAuth = {
   // ออกจากระบบ
   logout() {
     localStorage.removeItem("thosbook_user");
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   },
 
   // Guard สำหรับหน้าทั่วไป (ต้องเข้าสู่ระบบก่อน)
   requireAuth() {
     if (!this.isAuthenticated()) {
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
   },
 
   // Guard สำหรับหน้า Admin (ต้องเป็น Admin เท่านั้น)
   requireAdmin() {
     if (!this.isAuthenticated()) {
-      window.location.href = "login.html";
+      window.location.href = "index.html";
       return;
     }
     if (!this.isAdmin()) {

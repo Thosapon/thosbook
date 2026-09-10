@@ -1,3 +1,10 @@
+/**
+ * Thosbook - Desktop Dashboard Logic
+ * File: app.js
+ */
+
+import ThosbookAPI from './js/core/api.js';
+
 let isCollapsed = false;
 let allBookmarks = [];
 let cachedCategories = [];
@@ -5,93 +12,93 @@ let currentCategory = 'all';
 let uploadedImageBase64 = "";
 
 document.addEventListener("DOMContentLoaded", () => {
-  lucide.createIcons();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
   fetchCategories();
   fetchBookmarkData();
 });
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const navTexts = document.querySelectorAll('.nav-text');
-  const navItems = document.querySelectorAll('.nav-item');
-  const navIconOnly = document.querySelector('.nav-icon-only');
+// --- CENTRALIZED DASHBOARD DATA FETCHING ---
 
-  isCollapsed = !isCollapsed;
-
-  if (isCollapsed) {
-    sidebar.classList.remove('w-64', 'p-4');
-    sidebar.classList.add('w-16', 'p-2');
-    navTexts.forEach(el => el.classList.add('hidden'));
-    navItems.forEach(el => {
-      el.classList.remove('px-4');
-      el.classList.add('justify-center', 'px-2');
-    });
-    if (navIconOnly) navIconOnly.classList.replace('hidden', 'flex');
-  } else {
-    sidebar.classList.remove('w-16', 'p-2');
-    sidebar.classList.add('w-64', 'p-4');
-    navTexts.forEach(el => el.classList.remove('hidden'));
-    navItems.forEach(el => {
-      el.classList.remove('justify-center', 'px-2');
-      el.classList.add('px-4');
-    });
-    if (navIconOnly) navIconOnly.classList.replace('flex', 'hidden');
+async function loadDashboard() {
+  showLoading(true);
+  
+  // เรียกใช้ Centralized Service จาก ThosbookAPI
+  const response = await ThosbookAPI.getNormalizedDashboardData();
+  
+  showLoading(false);
+  if (!response.success) {
+    showErrorAlert(response.error);
+    return;
   }
+
+  const { stats, recentActivities } = response.data;
+  renderStats(stats);
+  renderRecentActivities(recentActivities);
 }
+
+// --- CATEGORIES & BOOKMARKS FETCHING ---
 
 async function fetchCategories() {
   const navContainer = document.getElementById("category-nav");
   if (!navContainer) return;
 
-  try {
-    const response = await fetch(`${GAS_API_URL}?action=getCategories`);
-    cachedCategories = await response.json();
-
-    let allItemsHtml = `
-      <a href="#" onclick="filterByCategory('all', this)" class="nav-icon-only hidden justify-center items-center text-brand-darkNavy bg-brand-accentOrange p-2.5 rounded-xl font-medium text-sm transition-colors mb-2">
-        <i data-lucide="layout-grid" class="w-5 h-5"></i>
-      </a>
-      <button onclick="filterByCategory('all', this)" class="category-btn nav-text w-full flex items-center gap-3 bg-brand-accentOrange text-brand-darkNavy px-4 py-2.5 rounded-xl font-semibold text-sm mb-1">
-        <i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i>
-        <span class="truncate">All Items</span>
-      </button>
-    `;
-
-    let categoriesHtml = "";
-    if (Array.isArray(cachedCategories)) {
-      cachedCategories.forEach((cat) => {
-        categoriesHtml += `
-          <div class="flex items-center justify-between rounded-xl hover:bg-gray-50 pr-2">
-            <button onclick="filterByCategory('${cat.id}', this)" 
-               class="category-btn nav-item flex-1 flex items-center gap-3 text-brand-darkNavy px-4 py-2.5 font-medium text-sm transition-colors text-left">
-              <i data-lucide="folder" class="w-5 h-5 shrink-0" style="color: ${cat.color || 'inherit'}"></i>
-              <span class="nav-text truncate">${cat.name}</span>
-            </button>
-          </div>
-        `;
-      });
-    }
-
-    navContainer.innerHTML = allItemsHtml + categoriesHtml;
-    populateCategoryDropdown(cachedCategories);
-    lucide.createIcons();
-  } catch (error) {
-    console.error("Error fetching categories:", error);
+  const response = await ThosbookAPI.getFormattedCategories();
+  if (!response.success) {
+    console.error("Error fetching categories:", response.error);
+    return;
   }
+
+  cachedCategories = response.data;
+
+  let allItemsHtml = `
+    <a href="#" onclick="filterByCategory('all', this)" class="nav-icon-only hidden justify-center items-center text-brand-darkNavy bg-brand-accentOrange p-2.5 rounded-xl font-medium text-sm transition-colors mb-2">
+      <i data-lucide="layout-grid" class="w-5 h-5"></i>
+    </a>
+    <button onclick="filterByCategory('all', this)" class="category-btn nav-text w-full flex items-center gap-3 bg-brand-accentOrange text-brand-darkNavy px-4 py-2.5 rounded-xl font-semibold text-sm mb-1">
+      <i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i>
+      <span class="truncate">All Items</span>
+    </button>
+  `;
+
+  let categoriesHtml = "";
+  if (Array.isArray(cachedCategories)) {
+    cachedCategories.forEach((cat) => {
+      categoriesHtml += `
+        <div class="flex items-center justify-between rounded-xl hover:bg-gray-50 pr-2">
+          <button onclick="filterByCategory('${cat.id}', this)" 
+             class="category-btn nav-item flex-1 flex items-center gap-3 text-brand-darkNavy px-4 py-2.5 font-medium text-sm transition-colors text-left">
+            <i data-lucide="folder" class="w-5 h-5 shrink-0" style="color: ${cat.color || 'inherit'}"></i>
+            <span class="nav-text truncate">${cat.name}</span>
+          </button>
+        </div>
+      `;
+    });
+  }
+
+  navContainer.innerHTML = allItemsHtml + categoriesHtml;
+  populateCategoryDropdown(cachedCategories);
+  if (window.lucide) lucide.createIcons();
 }
 
 async function fetchBookmarkData() {
   const container = document.getElementById('cards-container');
 
-  try {
-    const response = await fetch(`${GAS_API_URL}?action=getBookmarks`);
-    allBookmarks = await response.json();
-    renderBookmarks(allBookmarks);
-  } catch (error) {
-    console.error("Error fetching bookmarks:", error);
-    container.innerHTML = `<div class="col-span-full text-center py-12 text-red-500 font-medium">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+  const response = await ThosbookAPI.getBookmarks();
+  if (!response.success) {
+    console.error("Error fetching bookmarks:", response.error);
+    if (container) {
+      container.innerHTML = `<div class="col-span-full text-center py-12 text-red-500 font-medium">${response.error || 'เกิดข้อผิดพลาดในการโหลดข้อมูล'}</div>`;
+    }
+    return;
   }
+
+  allBookmarks = Array.isArray(response.data) ? response.data : [];
+  renderBookmarks(allBookmarks);
 }
+
+// --- RENDERING & UI HELPERS ---
 
 function renderBookmarks(data) {
   const container = document.getElementById('cards-container');
@@ -152,7 +159,36 @@ function renderBookmarks(data) {
     `;
     container.insertAdjacentHTML("beforeend", cardHtml);
   });
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const navTexts = document.querySelectorAll('.nav-text');
+  const navItems = document.querySelectorAll('.nav-item');
+  const navIconOnly = document.querySelector('.nav-icon-only');
+
+  isCollapsed = !isCollapsed;
+
+  if (isCollapsed) {
+    sidebar.classList.remove('w-64', 'p-4');
+    sidebar.classList.add('w-16', 'p-2');
+    navTexts.forEach(el => el.classList.add('hidden'));
+    navItems.forEach(el => {
+      el.classList.remove('px-4');
+      el.classList.add('justify-center', 'px-2');
+    });
+    if (navIconOnly) navIconOnly.classList.replace('hidden', 'flex');
+  } else {
+    sidebar.classList.remove('w-16', 'p-2');
+    sidebar.classList.add('w-64', 'p-4');
+    navTexts.forEach(el => el.classList.remove('hidden'));
+    navItems.forEach(el => {
+      el.classList.remove('justify-center', 'px-2');
+      el.classList.add('px-4');
+    });
+    if (navIconOnly) navIconOnly.classList.replace('flex', 'hidden');
+  }
 }
 
 function filterByCategory(catId, element) {
@@ -242,7 +278,7 @@ function openImageLightbox(imageUrl, title) {
   document.getElementById("lightbox-title").innerText = title || "Image Preview";
   document.getElementById("lightbox-download-btn").href = imageUrl;
   modal.classList.remove("hidden");
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 }
 
 function closeImageLightbox(e) {
@@ -271,44 +307,6 @@ function closeCategoryModal() {
   document.getElementById("category-form").reset();
 }
 
-async function handleSaveCategory(e) {
-  e.preventDefault();
-  const saveBtn = document.getElementById("save-cat-btn");
-  saveBtn.disabled = true;
-
-  const catId = document.getElementById("cat-id").value;
-  const isEdit = Boolean(catId);
-
-  const payload = {
-    action: isEdit ? "updateCategory" : "addCategory",
-    id: isEdit ? catId : undefined,
-    data: {
-      id: isEdit ? catId : "cat_" + Date.now(),
-      name: document.getElementById("cat-name").value,
-      color: document.getElementById("cat-color").value
-    }
-  };
-
-  try {
-    const res = await fetch(GAS_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json();
-    if (result.status === "success") {
-      closeCategoryModal();
-      fetchCategories();
-    } else {
-      showErrorNotification("Error", result.message);
-    }
-  } catch (err) {
-    showErrorNotification("Connection Error", "เชื่อมต่อล้มเหลว");
-  } finally {
-    saveBtn.disabled = false;
-  }
-}
-
 function openAddModal() {
   document.getElementById("add-modal").classList.remove("hidden");
   populateCategoryDropdown(cachedCategories);
@@ -321,40 +319,74 @@ function closeAddModal() {
   uploadedImageBase64 = "";
 }
 
+// --- FORM HANDLING WITH CENTRALIZED API ---
+
+async function handleSaveCategory(e) {
+  e.preventDefault();
+  const saveBtn = document.getElementById("save-cat-btn");
+  saveBtn.disabled = true;
+
+  const catId = document.getElementById("cat-id").value;
+  const isEdit = Boolean(catId);
+
+  const categoryData = {
+    id: isEdit ? catId : "cat_" + Date.now(),
+    name: document.getElementById("cat-name").value,
+    color: document.getElementById("cat-color").value
+  };
+
+  const response = isEdit 
+    ? await ThosbookAPI.updateCategory(catId, categoryData)
+    : await ThosbookAPI.addCategory(categoryData);
+
+  if (response.success) {
+    closeCategoryModal();
+    fetchCategories();
+  } else {
+    showErrorNotification("Error", response.error || "บันทึกข้อมูลไม่สำเร็จ");
+  }
+  
+  saveBtn.disabled = false;
+}
+
 async function handleAddBookmark(e) {
   e.preventDefault();
   const saveBtn = document.getElementById("save-bm-btn");
   saveBtn.disabled = true;
 
-  const payload = {
-    action: "addBookmark",
-    data: {
-      id: "bm_" + Date.now(),
-      category_id: document.getElementById("bm-category").value,
-      type: document.getElementById("bm-type").value,
-      title: document.getElementById("bm-title").value,
-      url: document.getElementById("bm-url").value,
-      content: document.getElementById("bm-content").value,
-      image_url: uploadedImageBase64
-    }
+  const bookmarkData = {
+    id: "bm_" + Date.now(),
+    category_id: document.getElementById("bm-category").value,
+    type: document.getElementById("bm-type").value,
+    title: document.getElementById("bm-title").value,
+    url: document.getElementById("bm-url").value,
+    content: document.getElementById("bm-content").value,
+    image_url: uploadedImageBase64
   };
 
-  try {
-    const res = await fetch(GAS_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json();
-    if (result.status === "success") {
-      closeAddModal();
-      fetchBookmarkData();
-    } else {
-      showErrorNotification("Error", result.message);
-    }
-  } catch (err) {
-    showErrorNotification("Connection Error", "เชื่อมต่อล้มเหลว");
-  } finally {
-    saveBtn.disabled = false;
+  const response = await ThosbookAPI.addBookmark(bookmarkData);
+
+  if (response.success) {
+    closeAddModal();
+    fetchBookmarkData();
+  } else {
+    showErrorNotification("Error", response.error || "บันทึกข้อมูลไม่สำเร็จ");
   }
+
+  saveBtn.disabled = false;
 }
+
+// Export Functions ให้ HTML Inline Events เรียกใช้งานได้เมื่อใช้ ES Modules
+window.filterByCategory = filterByCategory;
+window.handleSearch = handleSearch;
+window.toggleSidebar = toggleSidebar;
+window.openCategoryModal = openCategoryModal;
+window.closeCategoryModal = closeCategoryModal;
+window.handleSaveCategory = handleSaveCategory;
+window.openAddModal = openAddModal;
+window.closeAddModal = closeAddModal;
+window.handleAddBookmark = handleAddBookmark;
+window.previewAddImage = previewAddImage;
+window.openImageLightbox = openImageLightbox;
+window.closeImageLightbox = closeImageLightbox;
+window.closeNotifyModal = closeNotifyModal;

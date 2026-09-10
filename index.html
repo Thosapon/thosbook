@@ -1,59 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thosbook - Redirecting...</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Thosbook Design System CSS -->
+  <title>Thosbook - Management System</title>
+  
+  <!-- Custom CSS Theme -->
   <link rel="stylesheet" href="css/theme.css">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: { colors: { brand: { navy: '#0c3d88', pageBg: '#e9ecef' } }, fontFamily: { montserrat: ['Montserrat', 'sans-serif'] } }
-      }
-    }
-  </script>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React 18 & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  
+  <!-- Babel Standalone สำหรับแปลง JSX และ ES Modules บน Browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-brand-pageBg font-montserrat min-h-screen flex items-center justify-center p-4">
-  <div class="text-center space-y-4">
-    <div class="w-12 h-12 border-4 border-brand-navy border-t-transparent rounded-full animate-spin mx-auto"></div>
-    <p class="text-sm font-semibold text-brand-navy">กำลังเข้าสู่ระบบ Thosbook...</p>
-  </div>
+<body class="bg-gray-50 text-gray-900 antialiased">
+  
+  <!-- Single Page Application Root Element -->
+  <div id="root"></div>
 
-  <script src="js/core/config.js"></script>
-  <script src="js/core/auth.js"></script>
-  <script>
-    /*
-    document.addEventListener("DOMContentLoaded", () => {
-      if (!ThosbookAuth.isAuthenticated()) {
-        window.location.replace("login.html");
-      } else {
-        if (window.innerWidth < 768) {
-          window.location.replace("m_dashboard.html");
-        } else {
-          window.location.replace("dashboard.html");
-        }
-      }
-    });
-    */
-
-    document.addEventListener("DOMContentLoaded", () => {
-  // เปลี่ยนจาก ThosbookAuth.isAuthenticated() เป็น ThosbookAuth.getUser()
-    if (ThosbookAuth.getUser()) {
-    if (window.innerWidth < 768) {
-        window.location.replace("m_dashboard.html");
-      } else {
-        window.location.replace("dashboard.html");
-      }
-    } else {
-      window.location.replace("login.html");
-      }
-    });
-
+  <!-- Entry Point: เรียกใช้ React AppRouter ผ่าน Babel Transformer -->
+  <script 
+    type="text/babel" 
+    data-presets="env,react"
+    src="src/router/AppRouter.jsx">
   </script>
 </body>
 </html>

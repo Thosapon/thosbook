@@ -1,6 +1,9 @@
 /**
  * Thosbook - Mobile UI Controller (Optimized with Instant Cache & Unified API Schema)
+ * File: js/components/mobile-app.js
  */
+
+import ThosbookAPI from '../core/api.js';
 
 let mobileCategories = [];
 let mobileBookmarks = [];
@@ -68,27 +71,23 @@ async function loadDashboardPage() {
     }
   }
 
-  // 2. Background Fetch ดึงข้อมูลล่าสุดจาก API
-  try {
-    const response = await ThosbookAPI.getDashboardData();
+  // 2. Background Fetch ดึงข้อมูลล่าสุดผ่าน Centralized API (แชร์ Logic เดียวกับ Desktop)
+  const response = await ThosbookAPI.getNormalizedDashboardData();
 
-    if (response && (response.status === 'success' || response.success)) {
-      mobileCategories = response.categories || [];
-      mobileBookmarks = response.bookmarks || [];
+  if (response.success) {
+    mobileCategories = response.data.categories || [];
+    mobileBookmarks = response.data.bookmarks || response.data.recentActivities || [];
 
-      // อัปเดต Cache
-      localStorage.setItem(CACHE_KEY_DASHBOARD, JSON.stringify({ categories: mobileCategories, bookmarks: mobileBookmarks }));
-      
-      // Render UI ใหม่
-      renderDashboardUI(mobileCategories, mobileBookmarks);
-    } else if (!cachedData && container) {
-      container.innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">ยังไม่มีข้อมูล</div>`;
-    }
-  } catch (error) {
-    console.error('Error loading mobile dashboard:', error);
-    if (!cachedData && container) {
-      container.innerHTML = `<div class="text-center py-8 text-[#fe0001] text-sm">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
-    }
+    // อัปเดต Cache
+    localStorage.setItem(CACHE_KEY_DASHBOARD, JSON.stringify({ 
+      categories: mobileCategories, 
+      bookmarks: mobileBookmarks 
+    }));
+    
+    // Render UI ใหม่
+    renderDashboardUI(mobileCategories, mobileBookmarks);
+  } else if (!cachedData && container) {
+    container.innerHTML = `<div class="text-center py-8 text-[#fe0001] text-sm">${response.error || 'เกิดข้อผิดพลาดในการโหลดข้อมูล'}</div>`;
   }
 }
 
@@ -195,23 +194,15 @@ async function loadCategoryListPage() {
     }
   }
 
-  // 2. Fetch API Sync
-  try {
-    const res = await ThosbookAPI.getCategories();
-    const categoriesData = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+  // 2. Fetch API Sync ผ่าน Centralized Service
+  const res = await ThosbookAPI.getFormattedCategories();
 
-    if (categoriesData.length > 0) {
-      mobileCategories = categoriesData;
-      localStorage.setItem(CACHE_KEY_CAT, JSON.stringify(categoriesData));
-      renderCategoryListUI(categoriesData, container);
-    } else if (!cachedCat) {
-      container.innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">ไม่พบหมวดหมู่</div>`;
-    }
-  } catch (error) {
-    console.error("Error loading categories:", error);
-    if (!cachedCat) {
-      container.innerHTML = `<div class="text-center py-8 text-[#fe0001] text-sm">เกิดข้อผิดพลาดในการโหลดหมวดหมู่</div>`;
-    }
+  if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+    mobileCategories = res.data;
+    localStorage.setItem(CACHE_KEY_CAT, JSON.stringify(res.data));
+    renderCategoryListUI(res.data, container);
+  } else if (!cachedCat) {
+    container.innerHTML = `<div class="text-center py-8 text-[#fe0001] text-sm">${res.error || 'เกิดข้อผิดพลาดในการโหลดหมวดหมู่'}</div>`;
   }
 }
 
@@ -268,24 +259,23 @@ async function loadCategoryDetailPage() {
   }
 
   // 2. API Sync
-  try {
-    const [catRes, bmRes] = await Promise.all([
-      ThosbookAPI.getCategories(),
-      ThosbookAPI.getBookmarks()
-    ]);
+  const [catRes, bmRes] = await Promise.all([
+    ThosbookAPI.getCategories(),
+    ThosbookAPI.getBookmarks()
+  ]);
 
-    mobileCategories = (catRes && catRes.data) ? catRes.data : [];
-    const allBookmarks = (bmRes && bmRes.data) ? bmRes.data : [];
-
+  if (catRes.success) {
+    mobileCategories = Array.isArray(catRes.data) ? catRes.data : [];
     if (mobileCategories.length > 0) localStorage.setItem(CACHE_KEY_CAT, JSON.stringify(mobileCategories));
-    if (allBookmarks.length > 0) localStorage.setItem(CACHE_KEY_BM, JSON.stringify(allBookmarks));
+  }
 
+  const allBookmarks = (bmRes.success && Array.isArray(bmRes.data)) ? bmRes.data : [];
+  if (allBookmarks.length > 0) localStorage.setItem(CACHE_KEY_BM, JSON.stringify(allBookmarks));
+
+  if (catRes.success || bmRes.success) {
     processCategoryDetail(catParam, mobileCategories, allBookmarks, container, titleEl);
-  } catch (error) {
-    console.error("Error loading category bookmarks:", error);
-    if (!cachedBM) {
-      container.innerHTML = `<div class="text-center py-10 text-[#fe0001] text-sm">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
-    }
+  } else if (!cachedBM) {
+    container.innerHTML = `<div class="text-center py-10 text-[#fe0001] text-sm">${bmRes.error || catRes.error || 'เกิดข้อผิดพลาดในการโหลดข้อมูล'}</div>`;
   }
 }
 
@@ -334,7 +324,8 @@ async function handleSaveBookmark(e) {
 
   try {
     const res = await ThosbookAPI.addBookmark(payload);
-    if (res && (res.status === 'success' || res.success)) {
+
+    if (res.success) {
       if (typeof ThosbookUI !== "undefined") {
         ThosbookUI.success("บันทึกเรียบร้อย");
       }
@@ -343,11 +334,14 @@ async function handleSaveBookmark(e) {
       loadDashboardPage();
     } else {
       if (typeof ThosbookUI !== "undefined") {
-        ThosbookUI.error(res.message || "ไม่สามารถบันทึกได้");
+        ThosbookUI.error(res.error || "ไม่สามารถบันทึกได้");
       }
     }
   } catch (err) {
     console.error("Save Bookmark Error:", err);
+    if (typeof ThosbookUI !== "undefined") {
+      ThosbookUI.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    }
   } finally {
     if (btn) {
       btn.disabled = false;

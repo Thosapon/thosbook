@@ -1,9 +1,11 @@
+// ตำแหน่งที่แก้ไข: tailwind.config.js -> เปลี่ยนจาก module.exports เป็น export default
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./js/**/*.js"
   ],
   theme: {
     extend: {
@@ -36,11 +38,11 @@ module.exports = {
         },
         // Mapped Semantic Tokens
         surface: {
-          page: '#f0f0f0',        // Mapped.Surface.page
-          default: '#ececec',     // Mapped.Surface.default
-          highlight: '#f2f7ff',   // Mapped.Surface.highlight
-          primary: '#0c3d88',     // Mapped.Surface.action-primary
-          hover: '#fa680a',       // Mapped.Surface.action-primary-hover
+          page: '#f0f0f0',
+          default: '#ececec',
+          highlight: '#f2f7ff',
+          primary: '#0c3d88',
+          hover: '#fa680a',
         },
         text: {
           heading: '#041c43',

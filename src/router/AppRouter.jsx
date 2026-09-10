@@ -1,13 +1,19 @@
-// ตำแหน่งที่แก้ไข: src/router/AppRouter.jsx (แก้ไข Duplicate Imports, ใส่ lazy/Suspense)
+// ตำแหน่งที่แก้ไข: src/router/AppRouter.jsx -> ลบ Import ซ้ำซ้อน แก้ไข Syntax Error ชื่อตัวแปร
 
 import React, { useState, lazy, Suspense } from 'react';
+
+// Eager Imports สำหรับ Layouts และ Components หลัก
 import { DashboardView } from '../views/DashboardView.jsx';
+import { CategoriesView } from '../views/CategoriesView.jsx';
+import { NotificationsView } from '../views/NotificationsView.jsx';
+import { SettingsView } from '../views/SettingsView.jsx';
 import { MobileDashboardView } from '../views/MobileDashboardView.jsx';
+
 import { MobileBottomNav } from '../components/MobileBottomNav.jsx';
 import { ErrorBoundary } from '../components/ErrorBoundary.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 
-// Dynamic Lazy Imports สำหรับ Views รอง
+// Dynamic Lazy Imports สำหรับ Views รอง (รองรับทั้ง Named และ Default Export)
 const CategoriesView = lazy(() => import('../views/CategoriesView.jsx').then(m => ({ default: m.CategoriesView || m.default })));
 const NotificationsView = lazy(() => import('../views/NotificationsView.jsx').then(m => ({ default: m.NotificationsView || m.default })));
 const SettingsView = lazy(() => import('../views/SettingsView.jsx').then(m => ({ default: m.SettingsView || m.default })));

@@ -14,6 +14,8 @@ import { ErrorBoundary } from '../components/ErrorBoundary.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 
 // Dynamic Lazy Imports สำหรับ Views รอง (รองรับทั้ง Named และ Default Export)
+const DashboardView = lazy(() => import('../views/DashboardView.jsx').then(m => ({ default: m.CategoriesView || m.default })));
+const MobileDashboardView = lazy(() => import('../views/MobileDashboardView.jsx').then(m => ({ default: m.CategoriesView || m.default })));
 const CategoriesView = lazy(() => import('../views/CategoriesView.jsx').then(m => ({ default: m.CategoriesView || m.default })));
 const NotificationsView = lazy(() => import('../views/NotificationsView.jsx').then(m => ({ default: m.NotificationsView || m.default })));
 const SettingsView = lazy(() => import('../views/SettingsView.jsx').then(m => ({ default: m.SettingsView || m.default })));

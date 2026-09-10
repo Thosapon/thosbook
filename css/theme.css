@@ -89,7 +89,7 @@
 
 .mobile-top-nav,
 .mobile-bottom-nav {
-  height: 108px;
+  height: 80px;
   background-color: var(--color-surface-action-secondary);
 }
 

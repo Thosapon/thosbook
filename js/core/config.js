@@ -8,7 +8,7 @@ const GET_API_URL = () => {
   if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  return "https://script.google.com/macros/s/AKfycbz5laiYb-YlMcrhogO0DqH2tl7Itqgj3ImQBF51O7O6H1xq-GgxW061X87ZjPJUknIH/exec";
+  return "https://script.google.com/macros/s/AKfycbxf9lX_LoYN7GXLHUYsihZYqLBrg05rX31nAnt6BVyYQllY_KpRjL69mRuNgCaHWgoi/exec";
 };
 
 export const GAS_API_URL = GET_API_URL();

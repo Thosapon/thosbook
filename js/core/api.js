@@ -1,12 +1,7 @@
 /**
  * Thosbook - Centralized API Wrapper
- * จัดการการเชื่อมต่อดึง/บันทึกข้อมูลกับ Google Apps Script (GAS)
  */
-
 const ThosbookAPI = {
-  /**
-   * Helper ส่ง Request ไปยัง Google Apps Script (GET)
-   */
   async get(action) {
     try {
       const response = await fetch(`${GAS_API_URL}?action=${action}`);
@@ -18,9 +13,6 @@ const ThosbookAPI = {
     }
   },
 
-  /**
-   * Helper ส่ง Request ไปยัง Google Apps Script (POST)
-   */
   async post(payload) {
     try {
       const response = await fetch(GAS_API_URL, {
@@ -36,93 +28,24 @@ const ThosbookAPI = {
     }
   },
 
-  // --- CATEGORY SERVICES ---
-  async getCategories() {
-    return await this.get("getCategories");
-  },
+  // --- SERVICES ---
+  async getCategories() { return await this.get("getCategories"); },
+  async addCategory(data) { return await this.post({ action: "addCategory", data }); },
+  async updateCategory(id, data) { return await this.post({ action: "updateCategory", id, data }); },
+  async deleteCategory(id) { return await this.post({ action: "deleteCategory", id }); },
 
-  async addCategory(categoryData) {
-    return await this.post({
-      action: "addCategory",
-      data: categoryData
-    });
-  },
+  async getBookmarks() { return await this.get("getBookmarks"); },
+  async addBookmark(data) { return await this.post({ action: "addBookmark", data }); },
+  async updateBookmark(id, data) { return await this.post({ action: "updateBookmark", id, data }); },
+  async deleteBookmark(id) { return await this.post({ action: "deleteBookmark", id }); },
 
-  async updateCategory(id, categoryData) {
-    return await this.post({
-      action: "updateCategory",
-      id: id,
-      data: categoryData
-    });
-  },
-
-  async deleteCategory(id) {
-    return await this.post({
-      action: "deleteCategory",
-      id: id
-    });
-  },
-
-  // --- BOOKMARK SERVICES ---
-  async getBookmarks() {
-    return await this.get("getBookmarks");
-  },
-
-  async addBookmark(bookmarkData) {
-    return await this.post({
-      action: "addBookmark",
-      data: bookmarkData
-    });
-  },
-
-  async updateBookmark(id, bookmarkData) {
-    return await this.post({
-      action: "updateBookmark",
-      id: id,
-      data: bookmarkData
-    });
-  },
-
-  async deleteBookmark(id) {
-    return await this.post({
-      action: "deleteBookmark",
-      id: id
-    });
-  },
-
-  // --- USER SERVICES ---
-  async getUsers() {
-    return await this.get("getUsers");
-  },
-
-  async addUser(userData) {
-    return await this.post({
-      action: "addUser",
-      data: userData
-    });
-  },
-
-  async updateUser(id, userData) {
-    return await this.post({
-      action: "updateUser",
-      id: id,
-      data: userData
-    });
-  },
-
-  async deleteUser(id) {
-    return await this.post({
-      action: "deleteUser",
-      id: id
-    });
-  },
-
-  // --- AUTH SERVICES ---
+  async getUsers() { return await this.get("getUsers"); },
+  async addUser(data) { return await this.post({ action: "addUser", data }); },
+  async updateUser(id, data) { return await this.post({ action: "updateUser", id, data }); },
+  async deleteUser(id) { return await this.post({ action: "deleteUser", id }); },
+  async getDashboardData() { return await this.get("getDashboardData"); },
+  
   async login(username, password) {
-    return await this.post({
-      action: "login",
-      username: username,
-      password: password
-    });
+    return await this.post({ action: "login", username, password });
   }
 };

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Thosbook - Home</title>
+  <title>Thosbook - Mobile Dashboard</title>
 
-  <!-- Device Redirection Guard (สลับกลับไปหน้า Desktop เมื่อขยายหน้าจอ) -->
+  <!-- Device Redirection Guard -->
   <script>
     if (window.innerWidth >= 768) {
       window.location.replace("dashboard.html");
@@ -19,6 +19,10 @@
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Thosbook Design System CSS -->
+  <link rel="stylesheet" href="css/theme.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -27,7 +31,7 @@
       theme: {
         extend: {
           colors: {
-            brand: { navy: '#0c3d88', darkNavy: '#041c43', footerNavy: '#02132e', accentOrange: '#fee1ce', pageBg: '#e9ecef' }
+            brand: { navy: '#0c3d88', darkNavy: '#041c43', footerNavy: '#02132e', accentOrange: '#fee1ce', pageBg: '#f4f4f4', error: '#fe0001' }
           },
           fontFamily: { montserrat: ['Montserrat', 'sans-serif'], prompt: ['Prompt', 'sans-serif'] }
         }
@@ -36,46 +40,105 @@
   </script>
 </head>
 
-<body class="bg-brand-pageBg font-montserrat min-h-screen flex flex-col pb-24">
+<body class="bg-[#f4f4f4] font-prompt min-h-screen flex flex-col pb-[108px] antialiased">
 
-  <!-- TOP HEADER NAVBAR -->
-  <header class="bg-brand-navy text-white px-6 py-5 flex items-center justify-between shadow-md sticky top-0 z-30 w-full">
-    <a href="m_dashboard.html" class="text-3xl font-extrabold tracking-tight">Logo</a>
-    <div class="text-right">
-      <div id="header-user-name" class="text-base font-semibold leading-tight">Thosapon</div>
-      <div id="header-user-role" class="text-xs text-blue-200">Admin</div>
+<!-- TOP HEADER NAVBAR -->
+<header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
+  <h1 id="header-user-name" class="text-xl font-bold font-montserrat tracking-tight">Name</h1>
+  <div class="flex items-center gap-4">
+    <a href="m_notification.html" class="hover:opacity-80 transition-opacity"><i data-lucide="bell" class="w-6 h-6"></i></a>
+    <a href="m_settings.html" class="hover:opacity-80 transition-opacity"><i data-lucide="settings" class="w-6 h-6"></i></a>
+  </div>
+</header>
+
+  <!-- MOBILE SEARCH & ACTION BAR -->
+  <div class="w-full px-5 pt-5 pb-1 flex items-center gap-3">
+    <div class="relative flex-1">
+      <input 
+        type="text" 
+        id="mobile-search-input"
+        placeholder="ค้นหา Bookmark..." 
+        onkeyup="handleMobileSearch()"
+        class="w-full bg-white text-brand-darkNavy placeholder-gray-400 text-sm rounded-full py-3 pl-5 pr-11 border border-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
+      />
+      <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute right-4 top-3.5"></i>
     </div>
-  </header>
+    
+    <!-- ปุ่มเพิ่ม Bookmark -->
+    <button onclick="openAddBookmarkModal()" class="bg-brand-navy hover:bg-blue-900 text-white p-3 rounded-2xl shadow-sm shrink-0 transition-all active:scale-95">
+      <i data-lucide="plus" class="w-6 h-6"></i>
+    </button>
+  </div>
 
-  <!-- MAIN WORKSPACE (FULL WIDTH CARDS) -->
-  <main class="flex-1 px-5 py-6 space-y-5 w-full" id="mobile-bookmark-list-container">
-    <div class="text-center py-8 text-gray-400 text-sm">กำลังโหลดข้อมูล...</div>
+  <!-- MAIN WORKSPACE (BOOKMARK CARDS CONTAINER) -->
+  <main class="flex-1 px-5 py-4 space-y-4 w-full" id="mobile-bookmark-list-container">
+    <div class="text-center py-10 text-gray-400 text-sm">กำลังโหลดข้อมูล...</div>
   </main>
 
-  <!-- BOTTOM NAVIGATION BAR -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-brand-navy text-white px-4 py-3 flex items-center justify-around shadow-2xl z-40 w-full">
-    <a href="m_dashboard.html" class="flex flex-col items-center gap-1 opacity-100 text-white">
-      <i data-lucide="home" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Home</span>
-    </a>
-    <a href="m_category.html" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="star" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Category</span>
-    </a>
-    <a href="admin-manage.html" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="user" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Account</span>
-    </a>
-    <button onclick="handleLogout()" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="layout-grid" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Anothers</span>
-    </button>
-  </nav>
+<!-- BOTTOM NAVIGATION BAR -->
+<nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 text-white flex items-center justify-center gap-12 shadow-2xl z-40 w-full border-t border-blue-900/40">
+  <!-- Home Tab (Active) -->
+  <a href="m_dashboard.html" class="mobile-bottom-nav-item active">
+    <i data-lucide="home" class="w-6 h-6"></i>
+    <span class="text-[11px] tracking-wide">Home</span>
+  </a>
+
+  <!-- Category Tab (Inactive) -->
+  <a href="m_category.html" class="mobile-bottom-nav-item inactive">
+    <i data-lucide="star" class="w-6 h-6"></i>
+    <span class="text-[11px] tracking-wide">Category</span>
+  </a>
+</nav>
+
+  <!-- ADD BOOKMARK MOBILE BOTTOM SHEET MODAL -->
+  <div id="bookmark-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center hidden">
+    <div class="bg-white rounded-t-3xl p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="text-lg font-bold text-brand-darkNavy font-montserrat">New Bookmark</h3>
+        <button onclick="closeAddBookmarkModal()" class="text-gray-400 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="handleSaveBookmark(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Type</label>
+          <select id="bm-type" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy">
+            <option value="link">Link</option>
+            <option value="video">Video</option>
+            <option value="text">Text / Note</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Category</label>
+          <select id="bm-category" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy">
+            <option value="">-- เลือกหมวดหมู่ --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Title</label>
+          <input type="text" id="bm-title" required placeholder="ชื่อเรื่อง..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">URL (ถ้ามี)</label>
+          <input type="url" id="bm-url" placeholder="https://..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Description / Content</label>
+          <textarea id="bm-content" rows="3" placeholder="รายละเอียดหรือโน้ตสรุป..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy"></textarea>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeAddBookmarkModal()" class="w-1/2 bg-gray-100 text-brand-darkNavy font-semibold py-3 rounded-xl text-sm">Cancel</button>
+          <button type="submit" id="save-bm-btn" class="w-1/2 bg-brand-navy text-white font-semibold py-3 rounded-xl text-sm shadow-md">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- SCRIPTS LOAD ORDER -->
   <script src="js/core/config.js"></script>
   <script src="js/core/auth.js"></script>
   <script src="js/core/api.js"></script>
   <script src="js/components/mobile-app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 </html>

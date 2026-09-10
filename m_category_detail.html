@@ -1,82 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Thosbook - Category Detail</title>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="css/theme.css">
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            brand: { navy: '#0c3d88', darkNavy: '#041c43', footerNavy: '#02132e', accentOrange: '#fee1ce', pageBg: '#e9ecef' }
-          },
+          colors: { brand: { navy: '#0c3d88', darkNavy: '#041c43', pageBg: '#f4f4f4' } },
           fontFamily: { montserrat: ['Montserrat', 'sans-serif'], prompt: ['Prompt', 'sans-serif'] }
         }
       }
     }
   </script>
 </head>
-
-<body class="bg-brand-pageBg font-montserrat min-h-screen flex flex-col pb-24">
+<body class="bg-brand-pageBg font-prompt min-h-screen flex flex-col antialiased">
 
   <!-- TOP HEADER NAVBAR -->
-  <header class="bg-brand-navy text-white px-6 py-5 flex items-center justify-between shadow-md sticky top-0 z-30 w-full">
-    <a href="m_dashboard.html" class="text-3xl font-extrabold tracking-tight">Logo</a>
-    <div class="text-right">
-      <div id="header-user-name" class="text-base font-semibold leading-tight">Thosapon</div>
-      <div id="header-user-role" class="text-xs text-blue-200">Admin</div>
-    </div>
-  </header>
-
-  <!-- PAGE TITLE BAR WITH BACK BUTTON -->
-  <div class="w-full px-5 pt-6 flex items-center relative">
-    <a href="m_category.html" class="p-1 text-brand-darkNavy hover:bg-gray-200 rounded-lg transition-colors absolute left-5">
+  <header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
+    <a href="m_category.html" class="text-white p-1 hover:opacity-80 transition-opacity">
       <i data-lucide="arrow-left" class="w-6 h-6"></i>
     </a>
-    <h1 class="text-xl font-bold text-brand-darkNavy text-center w-full" id="category-title">Loading...</h1>
-  </div>
+    <h1 id="category-title-header" class="text-lg font-bold font-montserrat tracking-tight">Category Detail</h1>
+    <div class="w-6"></div>
+  </header>
 
-  <!-- MAIN WORKSPACE (DYNAMIC BOOKMARK LIST) -->
-  <main class="flex-1 px-5 py-6 space-y-5 w-full" id="mobile-bookmark-list-container">
-    <div class="bg-white rounded-3xl p-8 text-center text-gray-400 text-sm shadow-sm border border-gray-100">กำลังโหลดรายการ...</div>
+  <!-- MAIN WORKSPACE -->
+  <main id="bookmark-list-container" class="flex-1 px-5 py-4 space-y-4 w-full">
+    <!-- Loading State Default -->
+    <div class="text-center py-12 text-gray-400 text-sm">
+      <i data-lucide="loader-2" class="w-7 h-7 animate-spin mx-auto mb-2 text-brand-navy"></i>
+      กำลังโหลดข้อมูล...
+    </div>
   </main>
 
-  <!-- BOTTOM NAVIGATION BAR -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-brand-navy text-white px-4 py-3 flex items-center justify-around shadow-2xl z-40 w-full">
-    <a href="m_dashboard.html" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="home" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Home</span>
-    </a>
-    <a href="m_category.html" class="flex flex-col items-center gap-1 opacity-100 text-white">
-      <i data-lucide="star" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Category</span>
-    </a>
-    <a href="admin-manage.html" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="user" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Account</span>
-    </a>
-    <button onclick="handleLogout()" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="layout-grid" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Anothers</span>
-    </button>
-  </nav>
-
-  <!-- SCRIPTS LOAD ORDER -->
   <script src="js/core/config.js"></script>
   <script src="js/core/auth.js"></script>
   <script src="js/core/api.js"></script>
-  <script src="js/components/mobile-app.js"></script>
+  <script>
+    const CACHE_KEY_CAT = 'thosbook_cache_categories';
+    const CACHE_KEY_BM = 'thosbook_cache_bookmarks';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadCategoryDetailFast();
+    });
+
+    async function loadCategoryDetailFast() {
+      const container = document.getElementById('bookmark-list-container');
+      const headerTitle = document.getElementById('category-title-header');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get('cat') || urlParams.get('cat_id');
+
+      if (!catParam) {
+        container.innerHTML = `<div class="text-center py-10 text-gray-400 text-sm">ไม่พบรหัสหมวดหมู่ที่ระบุ</div>`;
+        return;
+      }
+
+      // STEP 1: ลอง Render จาก Cache ล่าสุดก่อนทันที
+      const cachedCats = localStorage.getItem(CACHE_KEY_CAT);
+      const cachedBMs = localStorage.getItem(CACHE_KEY_BM);
+      let hasRenderedFromCache = false;
+
+      if (cachedCats && cachedBMs) {
+        try {
+          const categories = JSON.parse(cachedCats);
+          const bookmarks = JSON.parse(cachedBMs);
+          processAndRender(catParam, categories, bookmarks, headerTitle);
+          hasRenderedFromCache = true;
+        } catch (e) {
+          console.error('Cache Detail Read Error:', e);
+        }
+      }
+
+      // STEP 2: Fetch ข้อมูลใหม่แบบ Parallel จาก API
+      try {
+        const [catRes, bmRes] = await Promise.all([
+          ThosbookAPI.getCategories(),
+          ThosbookAPI.getBookmarks()
+        ]);
+
+        const categories = (catRes && catRes.data) ? catRes.data : [];
+        const allBookmarks = (bmRes && bmRes.data) ? bmRes.data : [];
+
+        // อัปเดตลง Cache
+        if (categories.length > 0) localStorage.setItem(CACHE_KEY_CAT, JSON.stringify(categories));
+        if (allBookmarks.length > 0) localStorage.setItem(CACHE_KEY_BM, JSON.stringify(allBookmarks));
+
+        // Render ข้อมูลจริงล่าสุด
+        processAndRender(catParam, categories, allBookmarks, headerTitle);
+
+      } catch (error) {
+        console.error('Fetch Category Detail Error:', error);
+        if (!hasRenderedFromCache) {
+          container.innerHTML = `<div class="text-center py-10 text-[#fe0001] text-sm">เกิดข้อผิดพลาด ไม่สามารถโหลดข้อมูลได้</div>`;
+        }
+      }
+    }
+
+    // ประมวลผลและแสดงผล UI
+    function processAndRender(catParam, categories, allBookmarks, headerTitle) {
+      const container = document.getElementById('bookmark-list-container');
+
+      // ตั้งค่า Title บน Header
+      const currentCat = categories.find(c => 
+        String(c.id) === String(catParam) || 
+        String(c.name).toLowerCase() === String(catParam).toLowerCase()
+      );
+
+      if (currentCat && currentCat.name) {
+        headerTitle.textContent = currentCat.name;
+        document.title = `Thosbook - ${currentCat.name}`;
+      } else {
+        headerTitle.textContent = decodeURIComponent(catParam);
+      }
+
+      // Filter Bookmark
+      const filteredBookmarks = allBookmarks.filter(bm => 
+        String(bm.category_id) === String(catParam) || 
+        (currentCat && String(bm.category_id) === String(currentCat.id))
+      );
+
+      if (filteredBookmarks.length > 0) {
+        renderBookmarkCards(filteredBookmarks);
+      } else {
+        container.innerHTML = `<div class="text-center py-12 text-gray-400 text-sm">ยังไม่มีรายการข้อมูลในหมวดหมู่นี้</div>`;
+      }
+    }
+
+    function renderBookmarkCards(items) {
+      const container = document.getElementById('bookmark-list-container');
+      const html = items.map(item => {
+        const tag = item.type || item.tag || 'Bookmark';
+        const title = item.title || 'Untitled';
+        const desc = item.content || item.description || '';
+        const url = item.url || '#';
+
+        return `
+          <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-2">
+            <span class="text-xs font-semibold text-brand-navy block">${tag}</span>
+            <h3 class="font-bold text-base text-brand-darkNavy">${title}</h3>
+            ${desc ? `<p class="text-xs text-gray-500">${desc}</p>` : ''}
+            ${url !== '#' ? `<a href="${url}" target="_blank" class="text-xs text-brand-navy underline inline-block pt-1 hover:text-blue-900">${url}</a>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+  </script>
 </body>
 </html>

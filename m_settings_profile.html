@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thosbook - Manage My Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="css/theme.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand: { navy: '#0c3d88', darkNavy: '#041c43', pageBg: '#f4f4f4', error: '#fe0001' } },
+          fontFamily: { montserrat: ['Montserrat', 'sans-serif'], prompt: ['Prompt', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-pageBg font-prompt min-h-screen flex flex-col antialiased">
+
+  <!-- TOP HEADER NAVBAR -->
+  <header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
+    <a href="m_settings.html" class="text-white p-1 hover:opacity-80 transition-opacity">
+      <i data-lucide="arrow-left" class="w-6 h-6"></i>
+    </a>
+    <h1 class="text-lg font-bold font-montserrat tracking-tight">User Information</h1>
+    <div class="w-6"></div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 p-5 w-full space-y-4">
+    <h2 class="text-center font-bold text-brand-darkNavy text-base font-montserrat pt-2">Manage My Profile</h2>
+
+    <form onsubmit="handleSaveProfile(event)" novalidate class="space-y-4 pt-1">
+      <!-- Name Field -->
+      <div>
+        <label class="block text-sm font-medium text-brand-darkNavy mb-1.5 font-montserrat">Name</label>
+        <input 
+          type="text" 
+          id="user-name-input" 
+          placeholder="Enter your name" 
+          oninput="resetFieldError(this, 'Enter your name')"
+          class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm text-brand-darkNavy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-navy transition-colors"
+        />
+      </div>
+
+      <!-- Email Field -->
+      <div>
+        <label class="block text-sm font-medium text-brand-darkNavy mb-1.5 font-montserrat">Email</label>
+        <input 
+          type="email" 
+          id="user-email-input" 
+          placeholder="Enter your email" 
+          oninput="resetFieldError(this, 'Enter your email')"
+          class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm text-brand-darkNavy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-navy transition-colors"
+        />
+      </div>
+
+      <!-- Save Button -->
+      <button type="submit" class="w-full bg-[#0c3d88] hover:bg-blue-900 text-white font-semibold py-3.5 rounded-full shadow-md mt-6 transition-all active:scale-95">
+        Save
+      </button>
+    </form>
+  </main>
+
+  <script src="js/core/auth.js"></script>
+  <script>
+    lucide.createIcons();
+
+    function handleSaveProfile(e) {
+      e.preventDefault();
+      
+      const nameInput = document.getElementById('user-name-input');
+      const emailInput = document.getElementById('user-email-input');
+      let isValid = true;
+
+      // Validate Name
+      if (!nameInput.value.trim()) {
+        showFieldError(nameInput, 'Please enter Name');
+        isValid = false;
+      }
+
+      // Validate Email
+      if (!emailInput.value.trim()) {
+        showFieldError(emailInput, 'Please enter an Email');
+        isValid = false;
+      }
+
+      // บันทึกข้อมูลเมื่อกรอกครบ
+      if (isValid) {
+        ThosbookUI.success('บันทึกข้อมูลเรียบร้อยแล้ว').then(() => {
+          location.href = 'm_settings.html';
+        });
+      }
+    }
+
+    // ฟังก์ชันแสดง Error State สีแดงตรงตาม Mockup
+    function showFieldError(inputEl, errorMessage) {
+      inputEl.value = '';
+      inputEl.placeholder = errorMessage;
+      inputEl.classList.remove('border-gray-200', 'placeholder:text-gray-400', 'focus:ring-brand-navy');
+      inputEl.classList.add('border-[#fe0001]', 'placeholder:text-[#fe0001]', 'text-[#fe0001]', 'focus:ring-[#fe0001]');
+    }
+
+    // ฟังก์ชันคืนค่าเป็นปกติเมื่อผู้ใช้เริ่มพิมพ์
+    function resetFieldError(inputEl, defaultPlaceholder) {
+      inputEl.placeholder = defaultPlaceholder;
+      inputEl.classList.remove('border-[#fe0001]', 'placeholder:text-[#fe0001]', 'text-[#fe0001]', 'focus:ring-[#fe0001]');
+      inputEl.classList.add('border-gray-200', 'placeholder:text-gray-400', 'text-brand-darkNavy', 'focus:ring-brand-navy');
+    }
+  </script>
+</body>
+</html>

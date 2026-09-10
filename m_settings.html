@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thosbook - Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="css/theme.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand: { navy: '#0c3d88', darkNavy: '#041c43', pageBg: '#f4f4f4' } },
+          fontFamily: { montserrat: ['Montserrat', 'sans-serif'], prompt: ['Prompt', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-pageBg font-prompt min-h-screen flex flex-col antialiased">
+
+  <header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
+    <a href="m_dashboard.html" class="text-white p-1 hover:opacity-80 transition-opacity">
+      <i data-lucide="arrow-left" class="w-6 h-6"></i>
+    </a>
+    <h1 class="text-lg font-bold font-montserrat tracking-tight">Setting</h1>
+    <div class="w-6"></div>
+  </header>
+
+  <main class="flex-1 p-5 w-full space-y-5">
+    <h2 class="text-center font-bold text-brand-darkNavy text-base font-montserrat">User Information</h2>
+
+    <div class="bg-white rounded-3xl p-2 shadow-sm border border-gray-100 divide-y divide-gray-100">
+      <a href="m_settings_profile.html" class="flex items-center justify-between p-3.5 hover:bg-gray-50 rounded-2xl transition-colors">
+        <div class="flex items-center gap-3">
+          <i data-lucide="user" class="w-5 h-5 text-brand-navy"></i>
+          <span class="font-medium text-brand-darkNavy text-sm">My Profile</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+      </a>
+
+      <a href="m_settings_password.html" class="flex items-center justify-between p-3.5 hover:bg-gray-50 rounded-2xl transition-colors">
+        <div class="flex items-center gap-3">
+          <i data-lucide="key" class="w-5 h-5 text-brand-navy"></i>
+          <span class="font-medium text-brand-darkNavy text-sm">Change Password</span>
+        </div>
+        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+      </a>
+    </div>
+
+    <button onclick="ThosbookAuth.logout()" class="w-full bg-brand-navy hover:bg-blue-900 text-white font-semibold py-3.5 rounded-full shadow-md flex items-center justify-center gap-2 transition-all">
+      <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+    </button>
+
+    <div class="text-center text-[11px] text-gray-400 pt-4">
+      <p>Version 1.10.1</p>
+      <p>© Copyright 2026 Thosbook</p>
+    </div>
+  </main>
+
+  <script src="js/core/auth.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

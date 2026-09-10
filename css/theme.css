@@ -1,0 +1,127 @@
+/**
+ * Thosbook - Design System & Custom Overrides
+ */
+
+/* ==========================================
+   1. DESIGN SYSTEM VARIABLES
+   ========================================== */
+:root {
+  --brand-navy: #0c3d88;
+  --brand-dark-navy: #041c43;
+  --brand-light-bg: #f8fafc;
+  
+  /* Design System Error Colors */
+  --color-error-default: #fe0001;
+  --color-error-hover: #be0000;
+  --color-error-bg: #fee3e4;
+
+  /* Design System Success Colors */
+  --color-success-default: #489a40;
+  --color-success-ring: rgba(72, 154, 64, 0.3);
+}
+
+/* ==========================================
+   2. SWEETALERT2 CUSTOM DESIGN SYSTEM
+   ========================================== */
+
+/* ย่อขนาด Icon แจ้งเตือนลง 50% และปรับ Margin */
+.swal2-popup .swal2-icon {
+  transform: scale(0.5) !important;
+  margin-top: -1rem !important;
+  margin-bottom: -1rem !important;
+}
+
+/* ปรับสี Icon ประเภท Warning & Error ให้เป็นสี Error/default (#fe0001) */
+.swal2-icon.swal2-warning,
+.swal2-icon.swal2-error {
+  border-color: var(--color-error-default) !important;
+  color: var(--color-error-default) !important;
+}
+
+/* ปรับสี Icon Info & Question ให้เป็นสี Brand Navy */
+.swal2-icon.swal2-info, 
+.swal2-icon.swal2-question {
+  border-color: var(--brand-navy) !important;
+  color: var(--brand-navy) !important;
+}
+
+/* ปรับสี Icon Success (วงแหวน + เครื่องหมายถูก) */
+.swal2-icon.swal2-success {
+  border-color: var(--brand-navy) !important;
+  color: var(--brand-navy) !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: var(--brand-navy) !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(12, 61, 136, 0.3) !important;
+}
+
+/* ปรับสี Icon Success (วงแหวน + เครื่องหมายถูก) ให้ตรง Design System */
+.swal2-icon.swal2-success {
+  border-color: var(--color-success-default) !important;
+  color: var(--color-success-default) !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: var(--color-success-default) !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: var(--color-success-ring) !important;
+}
+
+/* ==========================================
+   3. CUSTOM UTILITIES & TRANSITIONS
+   ========================================== */
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================
+   4. MOBILE HEADER & BOTTOM NAV SYSTEM
+   ========================================== */
+:root {
+  --color-surface-action-secondary: #0c3d88;
+}
+
+.mobile-top-nav,
+.mobile-bottom-nav {
+  height: 108px;
+  background-color: var(--color-surface-action-secondary);
+}
+
+.mobile-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Inactive State (50% Opacity + Outline Icon) */
+.mobile-bottom-nav-item.inactive {
+  opacity: 0.5;
+  color: #ffffff;
+}
+
+.mobile-bottom-nav-item.inactive:hover {
+  opacity: 0.8;
+}
+
+/* Active State (100% White + No Fill + Bold Text) */
+.mobile-bottom-nav-item.active {
+  opacity: 1;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ไอคอน Active ให้คงความโปร่ง/Outline ไว้ แค่เปลี่ยนสีเส้นเป็นขาวสว่าง */
+.mobile-bottom-nav-item.active [data-lucide] {
+  stroke: #ffffff !important;
+  fill: none !important;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thosbook - Notification Detail</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="css/theme.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand: { navy: '#0c3d88', darkNavy: '#041c43', pageBg: '#f4f4f4', error: '#fe0001' } },
+          fontFamily: { montserrat: ['Montserrat', 'sans-serif'], prompt: ['Prompt', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-pageBg font-prompt min-h-screen flex flex-col antialiased">
+
+  <header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
+    <a href="m_notification.html" class="text-white p-1 hover:opacity-80 transition-opacity">
+      <i data-lucide="arrow-left" class="w-6 h-6"></i>
+    </a>
+    <h1 class="text-lg font-bold font-montserrat tracking-tight">Notification</h1>
+    <div class="w-6"></div>
+  </header>
+
+  <main class="flex-1 p-5 w-full space-y-4">
+    <div>
+      <h2 class="font-bold text-brand-darkNavy text-base font-montserrat">Title AAAAAAAAAAAAAA</h2>
+      <p class="text-[10px] text-gray-400">15:11 PM</p>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-2">
+      <p class="text-sm font-semibold text-brand-darkNavy">Details</p>
+      <a href="#" class="text-xs text-brand-navy underline block">Link</a>
+    </div>
+
+    <button onclick="handleDeleteNotification()" class="w-full bg-[#fe0001] hover:bg-red-700 text-white font-semibold py-3.5 rounded-full shadow-md transition-all active:scale-95">
+      Delete
+    </button>
+  </main>
+
+  <script src="js/core/auth.js"></script>
+  <script>
+    lucide.createIcons();
+    function handleDeleteNotification() {
+      ThosbookUI.confirm('ยืนยันการลบ', 'คุณต้องการลบการแจ้งเตือนนี้ใช่หรือไม่?').then((res) => {
+        if(res.isConfirmed) {
+          ThosbookUI.success('ลบสำเร็จ').then(() => location.href = 'm_notification.html');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

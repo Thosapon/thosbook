@@ -13,12 +13,12 @@
 
     const userSession = JSON.parse(localStorage.getItem("thosbook_user") || "null");
     if (!userSession) {
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
 
     function handleLogout() {
       localStorage.removeItem("thosbook_user");
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }
   </script>
 
@@ -27,8 +27,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
   
+  <!-- SweetAlert2 CDN (สำหรับ Pop-up Alert สวยงามตาม Design System) -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Thosbook Design System CSS -->
+  <link rel="stylesheet" href="css/theme.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -90,8 +94,8 @@
   <!-- MAIN WORKSPACE -->
   <div class="flex-1 flex px-8 py-6 gap-6 max-w-[1600px] w-full mx-auto">
     
-    <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-white rounded-2xl p-4 shadow-sm flex flex-col justify-between shrink-0 sidebar-transition">
+    <!-- Sidebar -->    
+    <aside id="sidebar" class="w-64 h-fit bg-white rounded-2xl p-4 shadow-sm flex flex-col shrink-0 sidebar-transition space-y-4">
       <div class="space-y-3">
         
         <!-- Profile Header บน Sidebar -->
@@ -229,7 +233,7 @@
     </div>
   </div>
 
-  <!-- 3. ADD/EDIT CATEGORY MODAL -->
+<!-- 3. ADD/EDIT CATEGORY MODAL -->
   <div id="category-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-gray-100 space-y-4">
       <div class="flex justify-between items-center border-b border-gray-100 pb-3">
@@ -238,10 +242,20 @@
       </div>
       <form id="category-form" onsubmit="handleSaveCategory(event)" class="space-y-4">
         <input type="hidden" id="cat-id" />
+        
         <div>
           <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Category Name</label>
           <input type="text" id="cat-name" required placeholder="ชื่อหมวดหมู่..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-brand-darkNavy focus:outline-none focus:ring-2 focus:ring-brand-navy" />
         </div>
+
+        <!-- Category Icon Selector Grid -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-darkNavy mb-2">Select Icon</label>
+          <div id="cat-icon-grid" class="grid grid-cols-5 gap-2 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+            <!-- Icon Items Will Render Via JS -->
+          </div>
+        </div>
+
         <div>
           <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Icon Color</label>
           <div class="flex items-center gap-3">
@@ -249,6 +263,7 @@
             <span class="text-xs text-gray-500">เลือกสีสัญลักษณ์ประจำหมวดหมู่</span>
           </div>
         </div>
+
         <div class="flex gap-3 pt-2">
           <button type="button" onclick="closeCategoryModal()" class="w-1/2 bg-gray-100 hover:bg-gray-200 text-brand-darkNavy font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancel</button>
           <button type="submit" id="save-cat-btn" class="w-1/2 bg-brand-navy hover:bg-blue-900 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition-colors">Save Category</button>
@@ -259,6 +274,8 @@
 
   <!-- External Script Loaders -->
   <script src="js/core/config.js"></script>
+  <script src="js/core/auth.js"></script>
+  <script src="js/core/api.js"></script>
   <script src="app.js"></script>
   <script src="script.js"></script>
 </body>

@@ -1,6 +1,5 @@
 /**
- * Thosbook - Mobile UI Controller (Updated Version)
- * ควบคุมการ Render ข้อมูลและ Event บน Mobile Pages ทั้งหมด
+ * Thosbook - Mobile UI Controller (Updated Schema & ThosbookUI)
  */
 
 let mobileCategories = [];
@@ -8,16 +7,11 @@ let mobileBookmarks = [];
 
 // --- INITIALIZE MOBILE APP ---
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. ตรวจสอบ Session
   ThosbookAuth.requireAuth();
-
-  // 2. แสดงข้อมูล Header User Profile
   renderHeaderProfile();
 
-  // 3. Render Lucide Icons
   if (window.lucide) lucide.createIcons();
 
-  // 4. โหลดข้อมูลตามหน้าปัจจุบัน
   const currentPage = window.location.pathname.split("/").pop();
   
   if (currentPage === "m_dashboard.html" || currentPage === "") {
@@ -41,7 +35,6 @@ function renderHeaderProfile() {
   if (roleEl) roleEl.innerText = user.role || "viewer";
 }
 
-// --- LOGOUT HANDLER ---
 function handleLogout() {
   ThosbookAuth.logout();
 }
@@ -54,7 +47,6 @@ async function loadDashboardPage() {
   if (!container) return;
 
   try {
-    // ดึงทั้ง Categories และ Bookmarks มาพร้อมกัน
     const [categories, bookmarks] = await Promise.all([
       ThosbookAPI.getCategories(),
       ThosbookAPI.getBookmarks()
@@ -75,18 +67,52 @@ async function loadDashboardPage() {
   }
 }
 
+// 🔍 MOBILE SEARCH HANDLER
+function handleMobileSearch() {
+  const query = document.getElementById("mobile-search-input").value.trim().toLowerCase();
+  const container = document.getElementById("mobile-bookmark-list-container");
+  if (!container) return;
+
+  if (query === "") {
+    renderBookmarkCards(mobileBookmarks, container);
+    return;
+  }
+
+  const filtered = mobileBookmarks.filter(item => {
+    const matchTitle = item.title && item.title.toLowerCase().includes(query);
+    const matchContent = item.content && item.content.toLowerCase().includes(query);
+    const matchUrl = item.url && item.url.toLowerCase().includes(query);
+    return matchTitle || matchContent || matchUrl;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="bg-white rounded-3xl p-8 text-center text-gray-400 text-sm shadow-sm border border-gray-100">ไม่พบผลการค้นหา "${query}"</div>`;
+    return;
+  }
+
+  renderBookmarkCards(filtered, container);
+}
+
 // Helper ฟังก์ชันสำหรับ Render Cards บุ๊กมาร์ก
 function renderBookmarkCards(items, container) {
   container.innerHTML = "";
 
   items.forEach(bm => {
-    // หาชื่อ Category Name จาก ID
     const cat = mobileCategories.find(c => String(c.id) === String(bm.category_id));
     const catName = cat ? cat.name : "General";
 
-    const imageHtml = bm.image_url ? `
+    // รองรับทั้งคอลัมน์ชื่อใหม่ 'image' และชื่อเดิม 'image_url'
+    const imgVal = bm.image || bm.image_url;
+    const hasValidImage = imgVal && String(imgVal).trim() !== "" && String(imgVal) !== "undefined";
+
+    const imageHtml = hasValidImage ? `
       <div class="mb-3 overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
-        <img src="${bm.image_url}" alt="${bm.title}" class="w-full h-40 object-cover" />
+        <img 
+          src="${imgVal}" 
+          alt="${bm.title || 'Bookmark Image'}" 
+          class="w-full h-40 object-cover" 
+          onerror="this.parentElement.style.display='none'"
+        />
       </div>
     ` : '';
 
@@ -108,6 +134,72 @@ function renderBookmarkCards(items, container) {
   });
 
   if (window.lucide) lucide.createIcons();
+}
+
+// ==========================================
+// 🛠️ BOOKMARK MODAL HANDLERS (MOBILE SHEET)
+// ==========================================
+function openAddBookmarkModal() {
+  const modal = document.getElementById("bookmark-modal");
+  const select = document.getElementById("bm-category");
+
+  if (select && Array.isArray(mobileCategories)) {
+    select.innerHTML = '<option value="">-- เลือกหมวดหมู่ --</option>';
+    mobileCategories.forEach(c => {
+      select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+    });
+  }
+
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeAddBookmarkModal() {
+  const modal = document.getElementById("bookmark-modal");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function handleSaveBookmark(e) {
+  e.preventDefault();
+  const btn = document.getElementById("save-bm-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "กำลังบันทึก...";
+  }
+
+  const payload = {
+    id: "bm_" + Date.now(),
+    category_id: document.getElementById("bm-category").value,
+    type: document.getElementById("bm-type").value,
+    title: document.getElementById("bm-title").value.trim(),
+    content: document.getElementById("bm-content").value.trim(),
+    image: typeof currentUploadedImageData !== "undefined" ? currentUploadedImageData : "",
+    url: document.getElementById("bm-url").value.trim()
+  };
+
+  try {
+    const res = await ThosbookAPI.addBookmark(payload);
+    if (res && res.success) {
+      if (typeof ThosbookUI !== "undefined") {
+        ThosbookUI.success("สำเร็จ", "เพิ่ม Bookmark เรียบร้อย");
+      }
+      closeAddBookmarkModal();
+      loadDashboardPage();
+    } else {
+      if (typeof ThosbookUI !== "undefined") {
+        ThosbookUI.alert("เกิดข้อผิดพลาด", res.message || "ไม่สามารถบันทึกได้", "error");
+      }
+    }
+  } catch (err) {
+    console.error("Save Bookmark Error:", err);
+    if (typeof ThosbookUI !== "undefined") {
+      ThosbookUI.alert("ข้อผิดพลาด", "เกิดข้อผิดพลาดในการบันทึก Bookmark", "error");
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "Save";
+    }
+  }
 }
 
 // ==========================================
@@ -178,7 +270,12 @@ async function loadCategoryDetailPage() {
   if (!container) return;
 
   try {
-    const allBookmarks = await ThosbookAPI.getBookmarks();
+    const [categories, allBookmarks] = await Promise.all([
+      ThosbookAPI.getCategories(),
+      ThosbookAPI.getBookmarks()
+    ]);
+
+    mobileCategories = categories;
     mobileBookmarks = allBookmarks.filter(bm => String(bm.category_id) === String(catId));
 
     if (!Array.isArray(mobileBookmarks) || mobileBookmarks.length === 0) {
@@ -220,10 +317,22 @@ async function handleSaveCategory(e) {
   };
 
   try {
-    await ThosbookAPI.addCategory(payload);
-    closeCategoryModal();
-    loadCategoryListPage();
+    const res = await ThosbookAPI.addCategory(payload);
+    if (res && res.success) {
+      if (typeof ThosbookUI !== "undefined") {
+        ThosbookUI.success("สำเร็จ", "เพิ่มหมวดหมู่เรียบร้อย");
+      }
+      closeCategoryModal();
+      loadCategoryListPage();
+    } else {
+      if (typeof ThosbookUI !== "undefined") {
+        ThosbookUI.alert("เกิดข้อผิดพลาด", res.message || "ไม่สามารถบันทึกได้", "error");
+      }
+    }
   } catch (err) {
-    alert("เกิดข้อผิดพลาดในการบันทึกหมวดหมู่");
+    console.error("Save Category Error:", err);
+    if (typeof ThosbookUI !== "undefined") {
+      ThosbookUI.alert("ข้อผิดพลาด", "เกิดข้อผิดพลาดในการบันทึกหมวดหมู่", "error");
+    }
   }
 }

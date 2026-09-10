@@ -1,56 +1,95 @@
 /**
- * Thosbook - Auth & Session Guard
- * จัดการ Session ของผู้ใช้ สิทธิ์ Admin/Viewer และ Logout
+ * Thosbook - Auth Guard & Custom UI Helper
  */
-
 const ThosbookAuth = {
-  // ดึงข้อมูล User Session ปัจจุบัน
   getUser() {
     return JSON.parse(localStorage.getItem("thosbook_user") || "null");
   },
 
-  // เช็กว่าเข้าสู่ระบบแล้วหรือยัง
   isAuthenticated() {
     return this.getUser() !== null;
   },
 
-  // เช็กสิทธิ์ว่าเป็น Admin หรือไม่
-  isAdmin() {
-    const user = this.getUser();
-    if (!user) return false;
-    
-    const role = (user.role || "").toString().toLowerCase();
-    const username = (user.username || "").toString().toLowerCase();
-    return role === "admin" || username === "admin";
+  setSession(user) {
+    localStorage.setItem("thosbook_user", JSON.stringify(user));
   },
 
-  // บันทึก Session เมื่อ Login ผ่าน
-  setSession(userData) {
-    localStorage.setItem("thosbook_user", JSON.stringify(userData));
-  },
-
-  // ออกจากระบบ
   logout() {
     localStorage.removeItem("thosbook_user");
     window.location.href = "index.html";
   },
 
-  // Guard สำหรับหน้าทั่วไป (ต้องเข้าสู่ระบบก่อน)
   requireAuth() {
-    if (!this.isAuthenticated()) {
+    if (!this.getUser()) {
       window.location.href = "index.html";
     }
   },
 
-  // Guard สำหรับหน้า Admin (ต้องเป็น Admin เท่านั้น)
   requireAdmin() {
-    if (!this.isAuthenticated()) {
-      window.location.href = "index.html";
-      return;
-    }
-    if (!this.isAdmin()) {
-      alert("คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (สำหรับ Admin เท่านั้น)");
+    const user = this.getUser();
+    if (!user || user.role !== "admin") {
       window.location.href = "dashboard.html";
     }
+  },
+
+  isAdmin() {
+    const user = this.getUser();
+    return user && user.role === "admin";
+  }
+};
+
+/**
+ * ThosbookUI - SweetAlert2 Wrapper (Controlled via css/theme.css)
+ */
+const ThosbookUI = {
+  alert(title, text, icon = 'info') {
+    return Swal.fire({
+      title: title,
+      text: text,
+      icon: icon,
+      confirmButtonText: 'ตกลง',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'rounded-3xl p-6 shadow-2xl border border-gray-100 font-prompt',
+        title: 'text-xl font-bold text-brand-darkNavy font-montserrat',
+        htmlContainer: 'text-sm text-gray-500 font-prompt mt-1',
+        confirmButton: 'bg-brand-navy hover:bg-blue-900 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-all shadow-md mt-4 cursor-pointer'
+      }
+    });
+  },
+
+  success(title, text = '') {
+    return Swal.fire({
+      title: title,
+      text: text,
+      icon: 'success',
+      confirmButtonText: 'ตกลง',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'rounded-3xl p-6 shadow-2xl border border-gray-100 font-prompt',
+        title: 'text-xl font-bold text-brand-darkNavy font-montserrat',
+        htmlContainer: 'text-sm text-gray-500 font-prompt mt-1',
+        confirmButton: 'bg-brand-navy hover:bg-blue-900 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-all shadow-md mt-4 cursor-pointer'
+      }
+    });
+  },
+
+  confirm(title, text, confirmText = 'ใช่, ต้องการลบ') {
+    return Swal.fire({
+      title: title,
+      text: text,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: confirmText,
+      cancelButtonText: 'ยกเลิก',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'rounded-3xl p-6 shadow-2xl border border-gray-100 font-prompt',
+        title: 'text-xl font-bold text-brand-darkNavy font-montserrat',
+        htmlContainer: 'text-sm text-gray-500 font-prompt mt-1',
+        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-md mr-3 mt-4 cursor-pointer',
+        cancelButton: 'bg-gray-100 hover:bg-gray-200 text-brand-darkNavy font-semibold px-5 py-2.5 rounded-xl text-sm transition-all mt-4 cursor-pointer'
+      }
+    });
   }
 };

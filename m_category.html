@@ -1,101 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Thosbook - Category List</title>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
+  <title>Thosbook - Category</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="css/theme.css">
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            brand: { navy: '#0c3d88', darkNavy: '#041c43', footerNavy: '#02132e', accentOrange: '#fee1ce', pageBg: '#e9ecef' }
-          },
+          colors: { brand: { navy: '#0c3d88', darkNavy: '#041c43', pageBg: '#f4f4f4', error: '#fe0001' } },
           fontFamily: { montserrat: ['Montserrat', 'sans-serif'], prompt: ['Prompt', 'sans-serif'] }
         }
       }
     }
   </script>
 </head>
+<body class="bg-brand-pageBg font-prompt min-h-screen flex flex-col pb-[108px] antialiased">
 
-<body class="bg-brand-pageBg font-montserrat min-h-screen flex flex-col pb-24">
-
-  <!-- TOP HEADER NAVBAR -->
-  <header class="bg-brand-navy text-white px-6 py-5 flex items-center justify-between shadow-md sticky top-0 z-30 w-full">
-    <a href="m_dashboard.html" class="text-3xl font-extrabold tracking-tight">Logo</a>
-    <div class="text-right">
-      <div id="header-user-name" class="text-base font-semibold leading-tight">Thosapon</div>
-      <div id="header-user-role" class="text-xs text-blue-200">Admin</div>
+  <!-- Header Navbar -->
+  <header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
+    <h1 id="header-user-name" class="text-xl font-bold font-montserrat tracking-tight">Name</h1>
+    <div class="flex items-center gap-4">
+      <a href="m_notification.html" class="hover:opacity-80 transition-opacity"><i data-lucide="bell" class="w-6 h-6"></i></a>
+      <a href="m_settings.html" class="hover:opacity-80 transition-opacity"><i data-lucide="settings" class="w-6 h-6"></i></a>
     </div>
   </header>
 
-  <!-- MAIN WORKSPACE -->
-  <main class="flex-1 px-5 py-6 w-full">
-    <!-- CATEGORY CARD CONTAINER (DYNAMIC RENDER) -->
-    <div id="mobile-category-container" class="bg-white rounded-3xl p-6 shadow-sm space-y-3 border border-gray-100 w-full">
-      <div class="text-center py-8 text-gray-400 text-sm">กำลังโหลดหมวดหมู่...</div>
+  <!-- Main Content -->
+  <main class="flex-1 p-5 w-full">
+    <div class="bg-white rounded-3xl p-4 shadow-sm space-y-2 border border-gray-100">
+      
+      <!-- Container สำหรับ Render ลิสต์หมวดหมู่จริง -->
+      <div id="category-list-container" class="space-y-2 divide-y divide-gray-50">
+        <!-- Loading State Default -->
+        <div class="text-center py-6 text-gray-400 text-sm">
+          <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-brand-navy"></i>
+          กำลังโหลดหมวดหมู่...
+        </div>
+      </div>
+
+      <!-- New Category Button -->
+      <button onclick="openNewCategoryModal()" class="w-full py-3.5 mt-3 bg-gray-100 hover:bg-gray-200 text-brand-darkNavy rounded-2xl font-medium text-sm flex items-center justify-center gap-2 transition-all active:scale-95">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i> New Category
+      </button>
     </div>
   </main>
 
   <!-- BOTTOM NAVIGATION BAR -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-brand-navy text-white px-4 py-3 flex items-center justify-around shadow-2xl z-40 w-full">
-    <a href="m_dashboard.html" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
+  <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 text-white flex items-center justify-center gap-12 shadow-2xl z-40 w-full border-t border-blue-900/40">
+    <a href="m_dashboard.html" class="mobile-bottom-nav-item inactive">
       <i data-lucide="home" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Home</span>
+      <span class="text-[11px] tracking-wide">Home</span>
     </a>
-    <a href="m_category.html" class="flex flex-col items-center gap-1 opacity-100 text-white">
+    <a href="m_category.html" class="mobile-bottom-nav-item active">
       <i data-lucide="star" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Category</span>
+      <span class="text-[11px] tracking-wide">Category</span>
     </a>
-    <a href="admin-manage.html" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="user" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Account</span>
-    </a>
-    <button onclick="handleLogout()" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
-      <i data-lucide="layout-grid" class="w-6 h-6"></i>
-      <span class="text-xs font-medium">Anothers</span>
-    </button>
   </nav>
 
-  <!-- ADD CATEGORY MODAL -->
-  <div id="category-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl space-y-4">
-      <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="text-lg font-bold text-brand-darkNavy">New Category</h3>
-        <button onclick="closeCategoryModal()" class="text-gray-400"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <form onsubmit="handleSaveCategory(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Category Name</label>
-          <input type="text" id="cat-name" required placeholder="ชื่อหมวดหมู่..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Icon Color</label>
-          <input type="color" id="cat-color" value="#0c3d88" class="w-10 h-10 rounded-xl border-none cursor-pointer bg-transparent" />
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="button" onclick="closeCategoryModal()" class="w-1/2 bg-gray-100 text-brand-darkNavy font-semibold py-2.5 rounded-xl text-sm">Cancel</button>
-          <button type="submit" class="w-1/2 bg-brand-navy text-white font-semibold py-2.5 rounded-xl text-sm shadow-md">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- SCRIPTS LOAD ORDER -->
   <script src="js/core/config.js"></script>
   <script src="js/core/auth.js"></script>
   <script src="js/core/api.js"></script>
-  <script src="js/components/mobile-app.js"></script>
+  <script>
+    const CACHE_KEY_CAT = 'thosbook_cache_categories';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initUserProfile();
+      loadCategoryDataFast();
+    });
+
+    function initUserProfile() {
+      const headerUserName = document.getElementById('header-user-name');
+      const currentUser = ThosbookAuth.getUser ? ThosbookAuth.getUser() : JSON.parse(localStorage.getItem('thosbook_user') || '{}');
+      if (headerUserName && currentUser) {
+        headerUserName.textContent = currentUser.name || currentUser.username || 'User';
+      }
+    }
+
+    // โหลดข้อมูลแบบ Instant Render ด้วย Cache + Background Fetch
+    async function loadCategoryDataFast() {
+      const container = document.getElementById('category-list-container');
+      
+      // STEP 1: โหลดจาก Cache ขึ้นทันที (ถ้ามี)
+      const cachedData = localStorage.getItem(CACHE_KEY_CAT);
+      if (cachedData) {
+        try {
+          const categories = JSON.parse(cachedData);
+          if (categories && categories.length > 0) {
+            renderCategoryList(categories);
+          }
+        } catch (e) {
+          console.error('Cache Read Error:', e);
+        }
+      }
+
+      // STEP 2: ยิง API เพื่อซิงค์ข้อมูลล่าสุดเบื้องหลัง
+      try {
+        const response = await ThosbookAPI.getCategories();
+        if (response && (response.status === 'success' || response.success) && response.data) {
+          // อัปเดต Cache ล่าสุด
+          localStorage.setItem(CACHE_KEY_CAT, JSON.stringify(response.data));
+          
+          // Render ข้อมูลใหม่
+          if (response.data.length > 0) {
+            renderCategoryList(response.data);
+          } else {
+            container.innerHTML = `<div class="text-center py-6 text-gray-400 text-sm">ยังไม่มีหมวดหมู่ข้อมูล</div>`;
+          }
+        }
+      } catch (error) {
+        console.error('Fetch Category Error:', error);
+        // หากไม่มีทั้ง Cache และ API ล้มเหลว ค่อยแสดง Error State
+        if (!cachedData) {
+          container.innerHTML = `<div class="text-center py-6 text-[#fe0001] text-sm">ไม่สามารถโหลดข้อมูลหมวดหมู่ได้</div>`;
+        }
+      }
+    }
+
+    function renderCategoryList(categories) {
+      const container = document.getElementById('category-list-container');
+      const html = categories.map(cat => {
+        const catName = cat.name || cat.category || 'Unassigned';
+        const iconName = cat.icon || 'folder';
+        const catId = cat.id || encodeURIComponent(catName);
+
+        return `
+          <a href="m_category_detail.html?cat=${catId}" class="flex items-center justify-between p-3.5 hover:bg-gray-50 rounded-2xl transition-colors pt-2">
+            <div class="flex items-center gap-3">
+              <i data-lucide="${iconName}" class="w-5 h-5 text-brand-navy"></i>
+              <span class="font-medium text-brand-darkNavy text-sm">${catName}</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+          </a>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    async function openNewCategoryModal() {
+      const { value: categoryName } = await Swal.fire({
+        title: 'New Category',
+        input: 'text',
+        inputLabel: 'ชื่อหมวดหมู่ใหม่',
+        inputPlaceholder: 'ระบุชื่อหมวดหมู่...',
+        showCancelButton: true,
+        confirmButtonText: 'บันทึก',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#0c3d88',
+        customClass: {
+          popup: 'rounded-3xl',
+          confirmButton: 'rounded-full px-6 py-2.5',
+          cancelButton: 'rounded-full px-6 py-2.5'
+        },
+        inputValidator: (value) => {
+          if (!value || !value.trim()) return 'กรุณาระบุชื่อหมวดหมู่!';
+        }
+      });
+
+      if (categoryName) {
+        ThosbookUI.loading('กำลังบันทึก...');
+        try {
+          const result = await ThosbookAPI.addCategory({ name: categoryName.trim() });
+          Swal.close();
+
+          if (result && (result.status === 'success' || result.success)) {
+            await ThosbookUI.success('เพิ่มหมวดหมู่เรียบร้อยแล้ว');
+            // ล้าง Cache เพื่อให้ดึงข้อมูลใหม่
+            localStorage.removeItem(CACHE_KEY_CAT);
+            loadCategoryDataFast();
+          } else {
+            ThosbookUI.error(result.message || 'เกิดข้อผิดพลาดในการบันทึก');
+          }
+        } catch (err) {
+          Swal.close();
+          ThosbookUI.error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+        }
+      }
+    }
+  </script>
 </body>
 </html>

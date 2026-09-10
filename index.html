@@ -3,197 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thosbook - Login</title>
-
-  <!-- Google Fonts -->
+  <title>Thosbook - Redirecting...</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
+  <!-- Thosbook Design System CSS -->
+  <link rel="stylesheet" href="css/theme.css">
   <script>
     tailwind.config = {
       theme: {
-        extend: {
-          colors: {
-            brand: {
-              navy: '#0c3d88',
-              darkNavy: '#041c43',
-              footerNavy: '#02132e',
-              accentOrange: '#fee1ce',
-              pageBg: '#e9ecef',
-            }
-          },
-          fontFamily: {
-            montserrat: ['Montserrat', 'sans-serif'],
-            prompt: ['Prompt', 'sans-serif'],
-          }
-        }
+        extend: { colors: { brand: { navy: '#0c3d88', pageBg: '#e9ecef' } }, fontFamily: { montserrat: ['Montserrat', 'sans-serif'] } }
       }
     }
   </script>
 </head>
+<body class="bg-brand-pageBg font-montserrat min-h-screen flex items-center justify-center p-4">
+  <div class="text-center space-y-4">
+    <div class="w-12 h-12 border-4 border-brand-navy border-t-transparent rounded-full animate-spin mx-auto"></div>
+    <p class="text-sm font-semibold text-brand-navy">กำลังเข้าสู่ระบบ Thosbook...</p>
+  </div>
 
-<body class="bg-brand-pageBg font-montserrat min-h-screen flex flex-col justify-between">
-
-  <!-- HEADER NAVBAR -->
-  <header class="bg-brand-navy text-white shadow-md">
-    <div class="max-w-[1600px] w-full mx-auto px-8 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <i data-lucide="star" class="w-5 h-5 fill-current text-white"></i>
-        <span class="text-2xl font-bold tracking-tight">Thosbook</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN LOGIN WORKSPACE -->
-  <main class="flex-1 flex items-center justify-center p-6">
-    <div class="bg-white rounded-3xl p-8 shadow-xl max-w-sm w-full border border-gray-100 space-y-6">
-      
-      <div class="text-center space-y-1">
-        <h1 class="text-2xl font-bold text-brand-darkNavy tracking-tight">Login</h1>
-        <p class="text-xs text-gray-400">กรอกข้อมูลเพื่อเข้าสู่ระบบ Thosbook</p>
-      </div>
-
-      <!-- ERROR ALERT -->
-      <div id="error-alert" class="hidden bg-red-50 text-red-600 text-xs font-semibold p-3.5 rounded-xl border border-red-100 flex items-center gap-2">
-        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
-        <span id="error-message">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
-      </div>
-
-      <!-- LOGIN FORM -->
-      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Username</label>
-          <input 
-            type="text" 
-            id="username" 
-            required 
-            placeholder="Username" 
-            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-darkNavy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-brand-darkNavy mb-1">Password</label>
-          <div class="relative">
-            <input 
-              type="password" 
-              id="password" 
-              required 
-              placeholder="Password" 
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-brand-darkNavy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            />
-            <button 
-              type="button" 
-              onclick="togglePasswordVisibility()" 
-              class="absolute right-3 top-2.5 text-gray-400 hover:text-brand-navy focus:outline-none transition-colors"
-              title="Toggle Password Visibility"
-            >
-              <i data-lucide="eye" id="toggle-password-icon" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-
-        <button 
-          type="submit" 
-          id="login-btn"
-          class="w-full bg-brand-navy hover:bg-blue-900 text-white font-semibold py-2.5 rounded-xl text-sm shadow-md transition-colors mt-2"
-        >
-          Login
-        </button>
-      </form>
-
-    </div>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="bg-brand-footerNavy h-24 mt-auto"></footer>
-
-  <!-- SCRIPT -->
-  <script src="config.js"></script>
+  <script src="js/core/config.js"></script>
+  <script src="js/core/auth.js"></script>
   <script>
+    /*
     document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
-      
-      const session = localStorage.getItem("thosbook_user");
-      if (session) {
-        window.location.href = "dashboard.html";
+      if (!ThosbookAuth.isAuthenticated()) {
+        window.location.replace("login.html");
+      } else {
+        if (window.innerWidth < 768) {
+          window.location.replace("m_dashboard.html");
+        } else {
+          window.location.replace("dashboard.html");
+        }
+      }
+    });
+    */
+
+    document.addEventListener("DOMContentLoaded", () => {
+  // เปลี่ยนจาก ThosbookAuth.isAuthenticated() เป็น ThosbookAuth.getUser()
+    if (ThosbookAuth.getUser()) {
+    if (window.innerWidth < 768) {
+        window.location.replace("m_dashboard.html");
+      } else {
+        window.location.replace("dashboard.html");
+      }
+    } else {
+      window.location.replace("login.html");
       }
     });
 
-    function togglePasswordVisibility() {
-      const passwordInput = document.getElementById("password");
-      const toggleIcon = document.getElementById("toggle-password-icon");
-
-      if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        toggleIcon.setAttribute("data-lucide", "eye-off");
-      } else {
-        passwordInput.type = "password";
-        toggleIcon.setAttribute("data-lucide", "eye");
-      }
-      lucide.createIcons();
-    }
-
-    async function handleLogin(e) {
-      e.preventDefault();
-      
-      const btn = document.getElementById("login-btn");
-      const errorAlert = document.getElementById("error-alert");
-      const errorMsg = document.getElementById("error-message");
-
-      const usernameInput = document.getElementById("username").value.trim();
-      const passwordInput = document.getElementById("password").value.trim();
-
-      errorAlert.classList.add("hidden");
-      btn.disabled = true;
-      btn.innerText = "กำลังเข้าสู่ระบบ...";
-
-      const payload = {
-        action: "login",
-        username: usernameInput,
-        password: passwordInput
-      };
-
-      try {
-        const response = await fetch(GAS_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (result.status === "success") {
-          const userData = {
-            id: result.user.id || "usr_01",
-            username: result.user.username || usernameInput,
-            name: result.user.name || result.user.username || usernameInput,
-            role: (result.user.role || (usernameInput.toLowerCase() === 'admin' ? 'admin' : 'viewer')).toLowerCase()
-          };
-
-          localStorage.setItem("thosbook_user", JSON.stringify(userData));
-          window.location.href = "dashboard.html";
-        } else {
-          errorMsg.innerText = result.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
-          errorAlert.classList.remove("hidden");
-          lucide.createIcons();
-        }
-      } catch (err) {
-        console.error("Login Error:", err);
-        errorMsg.innerText = "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง";
-        errorAlert.classList.remove("hidden");
-        lucide.createIcons();
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Login";
-      }
-    }
   </script>
 </body>
 </html>

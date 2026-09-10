@@ -10,6 +10,15 @@
     if (window.innerWidth >= 768) {
       window.location.replace("dashboard.html");
     }
+    const userSession = JSON.parse(localStorage.getItem("thosbook_user") || "null");
+    if (!userSession) {
+      window.location.href = "index.html";
+    }
+
+    function handleLogout() {
+      localStorage.removeItem("thosbook_user");
+      window.location.href = "index.html";
+    }    
   </script>
 
   <!-- Google Fonts -->

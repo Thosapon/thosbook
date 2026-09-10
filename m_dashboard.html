@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -42,14 +42,14 @@
 
 <body class="bg-[#f4f4f4] font-prompt min-h-screen flex flex-col pb-[108px] antialiased">
 
-<!-- TOP HEADER NAVBAR -->
-<header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
-  <h1 id="header-user-name" class="text-xl font-bold font-montserrat tracking-tight">Name</h1>
-  <div class="flex items-center gap-4">
-    <a href="m_notification.html" class="hover:opacity-80 transition-opacity"><i data-lucide="bell" class="w-6 h-6"></i></a>
-    <a href="m_settings.html" class="hover:opacity-80 transition-opacity"><i data-lucide="settings" class="w-6 h-6"></i></a>
-  </div>
-</header>
+  <!-- TOP HEADER NAVBAR -->
+  <header class="mobile-top-nav text-white px-5 flex items-center justify-between shadow-sm sticky top-0 z-30 w-full shrink-0">
+    <h1 id="header-user-name" class="text-xl font-bold font-montserrat tracking-tight">Name</h1>
+    <div class="flex items-center gap-4">
+      <a href="m_notification.html" class="hover:opacity-80 transition-opacity"><i data-lucide="bell" class="w-6 h-6"></i></a>
+      <a href="m_settings.html" class="hover:opacity-80 transition-opacity"><i data-lucide="settings" class="w-6 h-6"></i></a>
+    </div>
+  </header>
 
   <!-- MOBILE SEARCH & ACTION BAR -->
   <div class="w-full px-5 pt-5 pb-1 flex items-center gap-3">
@@ -59,7 +59,7 @@
         id="mobile-search-input"
         placeholder="ค้นหา Bookmark..." 
         onkeyup="handleMobileSearch()"
-        class="w-full bg-white text-brand-darkNavy placeholder-gray-400 text-sm rounded-full py-3 pl-5 pr-11 border border-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
+        class="w-full bg-white text-brand-darkNavy placeholder-gray-400 text-sm rounded-full py-3 pl-5 pr-11 border border-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-navy transition-colors"
       />
       <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute right-4 top-3.5"></i>
     </div>
@@ -72,23 +72,26 @@
 
   <!-- MAIN WORKSPACE (BOOKMARK CARDS CONTAINER) -->
   <main class="flex-1 px-5 py-4 space-y-4 w-full" id="mobile-bookmark-list-container">
-    <div class="text-center py-10 text-gray-400 text-sm">กำลังโหลดข้อมูล...</div>
+    <div class="text-center py-10 text-gray-400 text-sm">
+      <i data-lucide="loader-2" class="w-7 h-7 animate-spin mx-auto mb-2 text-brand-navy"></i>
+      กำลังโหลดข้อมูล...
+    </div>
   </main>
 
-<!-- BOTTOM NAVIGATION BAR -->
-<nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 text-white flex items-center justify-center gap-12 shadow-2xl z-40 w-full border-t border-blue-900/40">
-  <!-- Home Tab (Active) -->
-  <a href="m_dashboard.html" class="mobile-bottom-nav-item active">
-    <i data-lucide="home" class="w-6 h-6"></i>
-    <span class="text-[11px] tracking-wide">Home</span>
-  </a>
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 text-white flex items-center justify-center gap-12 shadow-2xl z-40 w-full border-t border-blue-900/40">
+    <!-- Home Tab (Active) -->
+    <a href="m_dashboard.html" class="mobile-bottom-nav-item active">
+      <i data-lucide="home" class="w-6 h-6"></i>
+      <span class="text-[11px] tracking-wide">Home</span>
+    </a>
 
-  <!-- Category Tab (Inactive) -->
-  <a href="m_category.html" class="mobile-bottom-nav-item inactive">
-    <i data-lucide="star" class="w-6 h-6"></i>
-    <span class="text-[11px] tracking-wide">Category</span>
-  </a>
-</nav>
+    <!-- Category Tab (Inactive) -->
+    <a href="m_category.html" class="mobile-bottom-nav-item inactive">
+      <i data-lucide="star" class="w-6 h-6"></i>
+      <span class="text-[11px] tracking-wide">Category</span>
+    </a>
+  </nav>
 
   <!-- ADD BOOKMARK MOBILE BOTTOM SHEET MODAL -->
   <div id="bookmark-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center hidden">
@@ -137,8 +140,111 @@
   <script src="js/core/auth.js"></script>
   <script src="js/core/api.js"></script>
   <script src="js/components/mobile-app.js"></script>
+  
+  <!-- FAST LOAD & INSTANT RENDER SCRIPT -->
   <script>
-    lucide.createIcons();
+    const CACHE_KEY_DASHBOARD = 'thosbook_cache_dashboard';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initUserProfile();
+      loadDashboardDataFast();
+    });
+
+    // แสดงชื่อ User บน Header
+    function initUserProfile() {
+      const headerUserName = document.getElementById('header-user-name');
+      const currentUser = ThosbookAuth.getUser ? ThosbookAuth.getUser() : JSON.parse(localStorage.getItem('thosbook_user') || '{}');
+      if (headerUserName && currentUser) {
+        headerUserName.textContent = currentUser.name || currentUser.username || 'User';
+      }
+    }
+
+    // Instant Load Dashboard Data (Cache + Revalidate)
+    async function loadDashboardDataFast() {
+      const container = document.getElementById('mobile-bookmark-list-container');
+      
+      // 1. อ่านข้อมูลจาก Cache ขึ้นมาแสดงทันที (0ms)
+      const cachedDashboard = localStorage.getItem(CACHE_KEY_DASHBOARD);
+      let hasRenderedCache = false;
+
+      if (cachedDashboard) {
+        try {
+          const cacheData = JSON.parse(cachedDashboard);
+          if (cacheData && cacheData.bookmarks) {
+            renderDashboardCards(cacheData.bookmarks, cacheData.categories || []);
+            populateCategoryDropdown(cacheData.categories || []);
+            hasRenderedCache = true;
+          }
+        } catch (e) {
+          console.error('Cache Dashboard Parse Error:', e);
+        }
+      }
+
+      // 2. Fetch ข้อมูลใหม่ล่าสุดจาก API เบื้องหลัง
+      try {
+        const response = await ThosbookAPI.getDashboardData();
+        if (response && (response.status === 'success' || response.success)) {
+          // บันทึก Cache ล่าสุด
+          localStorage.setItem(CACHE_KEY_DASHBOARD, JSON.stringify(response));
+
+          const bookmarks = response.bookmarks || [];
+          const categories = response.categories || [];
+
+          // Render ข้อมูลสดใหม่
+          renderDashboardCards(bookmarks, categories);
+          populateCategoryDropdown(categories);
+        }
+      } catch (error) {
+        console.error('Fetch Dashboard Data Error:', error);
+        if (!hasRenderedCache) {
+          container.innerHTML = `<div class="text-center py-10 text-[#fe0001] text-sm">ไม่สามารถโหลดข้อมูล Bookmark ได้</div>`;
+        }
+      }
+    }
+
+    // Render Bookmark Cards
+    function renderDashboardCards(bookmarks, categories) {
+      const container = document.getElementById('mobile-bookmark-list-container');
+      if (!bookmarks || bookmarks.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-gray-400 text-sm">ยังไม่มี Bookmark ในระบบ</div>`;
+        return;
+      }
+
+      const catMap = {};
+      categories.forEach(c => catMap[c.id] = c.name);
+
+      const html = bookmarks.map(bm => {
+        const catName = catMap[bm.category_id] || 'General';
+        const title = bm.title || 'Untitled';
+        const content = bm.content || '';
+        const url = bm.url || '#';
+
+        return `
+          <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-2">
+            <span class="text-xs font-semibold text-brand-navy block">${catName}</span>
+            <h3 class="font-bold text-base text-brand-darkNavy">${title}</h3>
+            ${content ? `<p class="text-xs text-gray-500">${content}</p>` : ''}
+            ${url !== '#' ? `<a href="${url}" target="_blank" class="text-xs text-brand-navy underline inline-block pt-1 hover:text-blue-900">${url}</a>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // เติม Option หมวดหมู่ลงใน Dropdown ใน Modal
+    function populateCategoryDropdown(categories) {
+      const selectEl = document.getElementById('bm-category');
+      if (!selectEl) return;
+      
+      let optionsHtml = `<option value="">-- เลือกหมวดหมู่ --</option>`;
+      categories.forEach(c => {
+        optionsHtml += `<option value="${c.id}">${c.name}</option>`;
+      });
+      selectEl.innerHTML = optionsHtml;
+    }
   </script>
 </body>
 </html>

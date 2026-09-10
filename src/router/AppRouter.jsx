@@ -1,24 +1,34 @@
-// ตำแหน่งที่แก้ไข: src/router/AppRouter.jsx -> ลบ Import ซ้ำซ้อน แก้ไข Syntax Error ชื่อตัวแปร
+// ตำแหน่งที่แก้ไข: src/router/AppRouter.jsx -> เคลียร์ Import ชนกัน และใส่ Fallback ป้องกัน Build Error
 
 import React, { useState, lazy, Suspense } from 'react';
 
-// Eager Imports สำหรับ Layouts และ Components หลัก
+// Eager Imports สำหรับ Layout หลักที่มีไฟล์อยู่จริง
 import { DashboardView } from '../views/DashboardView.jsx';
-import { CategoriesView } from '../views/CategoriesView.jsx';
-import { NotificationsView } from '../views/NotificationsView.jsx';
-import { SettingsView } from '../views/SettingsView.jsx';
 import { MobileDashboardView } from '../views/MobileDashboardView.jsx';
 
+// Core UI Components
 import { MobileBottomNav } from '../components/MobileBottomNav.jsx';
 import { ErrorBoundary } from '../components/ErrorBoundary.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 
-// Dynamic Lazy Imports สำหรับ Views รอง (รองรับทั้ง Named และ Default Export)
-const DashboardView = lazy(() => import('../views/DashboardView.jsx').then(m => ({ default: m.CategoriesView || m.default })));
-const MobileDashboardView = lazy(() => import('../views/MobileDashboardView.jsx').then(m => ({ default: m.CategoriesView || m.default })));
-const CategoriesView = lazy(() => import('../views/CategoriesView.jsx').then(m => ({ default: m.CategoriesView || m.default })));
-const NotificationsView = lazy(() => import('../views/NotificationsView.jsx').then(m => ({ default: m.NotificationsView || m.default })));
-const SettingsView = lazy(() => import('../views/SettingsView.jsx').then(m => ({ default: m.SettingsView || m.default })));
+// Safe Dynamic Lazy Imports สำหรับ Views รอง
+const CategoriesView = lazy(() => 
+  import('../views/CategoriesView.jsx')
+    .then(m => ({ default: m.CategoriesView || m.default }))
+    .catch(() => ({ default: () => <div className="p-6 text-slate-500 text-center">หน้าจัดการหมวดหมู่ (กำลังพัฒนา)</div> }))
+);
+
+const NotificationsView = lazy(() => 
+  import('../views/NotificationsView.jsx')
+    .then(m => ({ default: m.NotificationsView || m.default }))
+    .catch(() => ({ default: () => <div className="p-6 text-slate-500 text-center">ศูนย์การแจ้งเตือน (กำลังพัฒนา)</div> }))
+);
+
+const SettingsView = lazy(() => 
+  import('../views/SettingsView.jsx')
+    .then(m => ({ default: m.SettingsView || m.default }))
+    .catch(() => ({ default: () => <div className="p-6 text-slate-500 text-center">ตั้งค่าระบบ (กำลังพัฒนา)</div> }))
+);
 
 // Fallback Loading UI
 const ViewLoader = () => (

@@ -1,60 +1,7 @@
-/**
- * Thosbook - Centralized API Wrapper
- */
-import { GAS_API_URL } from './config.js';
+// ... โค้ดส่วน import และ fetchApi ด้านบนคงเดิมไว้ ...
 
-/**
- * ฟังก์ชันกลางสำหรับเรียกใช้งาน API พร้อม Error Handling และ Timeout Controller
- * @param {string} url - API Endpoint URL
- * @param {object} options - Fetch options (method, headers, body, etc.)
- * @param {number} timeout - ระยะเวลา Timeout (มิลลิวินาที) ค่าเริ่มต้น 10000ms
- */
-export async function fetchApi(url, options = {}, timeout = 10000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-
-    clearTimeout(timer);
-
-    if (!response.ok) {
-      throw new Error(`HTTP Error status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return {
-      success: true,
-      data: data,
-      error: null
-    };
-
-  } catch (error) {
-    clearTimeout(timer);
-
-    let errorMessage = 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ';
-
-    if (error.name === 'AbortError') {
-      errorMessage = 'การเชื่อมต่อหมดเวลา (Timeout) กรุณาลองใหม่อีกครั้ง';
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    console.error('[API Fetch Error]:', error);
-
-    // คืนค่า Standard Error State ให้ UI นำไปจัดการต่อได้ง่าย
-    return {
-      success: false,
-      data: null,
-      error: errorMessage
-    };
-  }
-}
-
-export default {
+// 1. ประกาศตัวแปรและ Export Named Export ในชื่อ ThosbookAPI
+export const ThosbookAPI = {
   async get(action) {
     return await fetchApi(`${GAS_API_URL}?action=${action}`, {
       method: "GET"
@@ -155,3 +102,6 @@ export default {
     };
   }
 };
+
+// 2. Export Default ควบคู่ไปด้วยเพื่อรองรับการ Import รูปแบบเดิม
+export default ThosbookAPI;

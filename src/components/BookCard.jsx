@@ -3,15 +3,15 @@ import React from 'react';
 
 export function BookCard({ item }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow h-full">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-border-default flex flex-col justify-between hover:shadow-md transition-shadow h-full">
       <div>
         {/* Category Tag */}
-        <span className="text-xs font-medium text-gray-400 block mb-2">
+        <span className="text-xs font-medium text-text-muted block mb-2">
           {item?.categoryName || 'General'}
         </span>
 
         {/* Title */}
-        <h3 className="text-base font-bold text-gray-900 mb-3 leading-snug">
+        <h3 className="text-base font-bold text-text-heading mb-3 leading-snug">
           {item?.title}
         </h3>
 
@@ -24,19 +24,19 @@ export function BookCard({ item }) {
 
         {/* Description */}
         {item?.description && (
-          <p className="text-xs text-gray-500 line-clamp-4 leading-relaxed mb-4">
+          <p className="text-xs text-text-body line-clamp-4 leading-relaxed mb-4">
             {item.description}
           </p>
         )}
       </div>
 
       {/* Footer Link Action */}
-      <div className="pt-2 border-t border-gray-50">
+      <div className="pt-2 border-t border-border-default">
         <a
           href={item?.url || '#'}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center space-x-1 text-xs font-semibold text-[#0F4C81] hover:underline"
+          className="inline-flex items-center space-x-1 text-xs font-semibold text-brand-blue-500 hover:underline"
         >
           <span>เปิดลิงก์</span>
           <i className="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>

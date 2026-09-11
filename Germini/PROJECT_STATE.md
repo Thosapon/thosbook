@@ -34,12 +34,13 @@
 | **React Architecture Migration** | React Context API & Functional Components | โครงสร้าง React Functional Components + Hooks และ `ThosbookContext.jsx` สำหรับควบคุม Global State ตามข้อตกลง `CONVENTIONS.md` |
 | **Unified Data Fetching & CRUD State** | Centralized CRUD Operations (`ThosbookContext.jsx`) | รวมการดึงข้อมูลและจัดการ CRUD Operations (Add/Update/Delete) ทั้งหมดสำหรับ Bookmarks และ Categories ไว้ใน Context API เดียวกัน |
 | **Performance Optimization & Caching** | Code Splitting & In-Memory TTL Cache | เพิ่ม `React.lazy + Suspense` ลด Initial Bundle Size และเพิ่ม In-Memory Caching (5-min TTL + Cache Invalidation) ใน `ThosbookContext.jsx` ลดการดึงข้อมูลซ้ำซ้อนผ่าน GAS API |
-| **Production Reliability & Deployment** | Vercel Deployment & Vite Config | กำหนดค่า `vite.config.js`, `postcss.config.js`, `tailwind.config.js` (ESM) และ `vercel.json` ปรับใช้ `VITE_API_BASE_URL` รองรับ Production Build สมบูรณ์ |
+| **Production Reliability & Deployment** | Vercel Deployment & Vite Config Fixes | แก้ไขปัญหา Vercel Deployment Build Error ทั้งหมด: เพิ่ม Named & Default Exports สำหรับ `ThosbookAPI` ใน `js/core/api.js`, เพิ่ม `API_BASE_URL` และ `GAS_API_URL` ใน `js/core/config.js` และปรับแต่ง Vite Config ให้รองรับ Production Build สมบูรณ์ |
+| **Entry Point & Styling Resolution** | React SPA Entry Point & Tailwind CSS Integration | สร้างไฟล์ `src/main.jsx` เชื่อมต่อ `ThosbookProvider` กับ `AppRouter`, นำเข้า `css/theme.css` ครอบคลุม Tailwind Directives และตั้งค่า `index.html` ชี้ไปที่ Entry Point เพื่อแก้ปัญหา UI หลุด Styling |
 | **Modular UI Components** | Reusable Functional Components (`src/components/`) | แยก UI ชิ้นส่วนซ้ำๆ ออกเป็น React Functional Components เช่น `BookCard.jsx`, `BorrowReturnModal.jsx`, `NotificationBadge.jsx`, `MobileBottomNav.jsx`, `ErrorBoundary.jsx` และ `OfflineBanner.jsx` |
 | **Assembled Views & Layouts** | Main Dashboard Views (`src/views/`) | ประกอบ UI Components เข้าด้วยกันใน Views หลัก ได้แก่ `DashboardView.jsx` (Desktop), `MobileDashboardView.jsx` (Mobile), `CategoriesView.jsx`, `NotificationsView.jsx` และ `SettingsView.jsx` |
 | **Routing & View Switching** | Client-Side SPA Router (`src/router/AppRouter.jsx`) | ระบบ View Switcher จัดการการเปลี่ยนหน้าระหว่าง Dashboard, Categories, Notifications และ Settings แบบ SPA เต็มรูปแบบ |
 | **Production Reliability & Fallback** | Error Boundary & Offline Indicator | เพิ่ม `ErrorBoundary.jsx` ครอบ `AppRouter.jsx` เพื่อป้องกันแอปพลิเคชัน Crash หน้าขาว พร้อม `OfflineBanner.jsx` ตรวจจับและแจ้งเตือนเมื่อขาดอินเทอร์เน็ต |
-| **Environment & GAS Integration** | Live Google Sheets Sync & Real Borrow-Return | เชื่อมต่อฟังก์ชันยืม-คืนหนังสือใน `BorrowReturnModal.jsx` และ `ThosbookAPI` เข้ากับ Google Sheets จริง |
+| **Environment & GAS Integration** | Live Google Sheets Sync & Real Borrow-Return | เชื่อมต่อฟังก์ชันยืม-คืนหนังสือใน `BorrowReturnModal.jsx` และ `ThosbookAPI` เข้ากับ Google Sheets จริง พร้อมรองรับ `VITE_API_BASE_URL` Environment Variable บน Vercel |
 | **Authentication & Authorization** | ระบบเข้าสู่ระบบ / ออกจากระบบ (Login / Logout) | ตรวจสอบสิทธิ์ผ่าน `login.html` และควบคุม Session ด้วย `js/core/auth.js` |
 | **Legacy Sunset & Cleanup** | Modernized `index.html` & Archive Strategy | ทำการ Sunset และ Cleanup ไฟล์ HTML/JS เดิมฝั่ง Vanilla JS เข้าสู่ `legacy_archive/` และลบไฟล์ซ้ำซ้อนใน `src/components/AppRouter.js` |
 
@@ -65,9 +66,10 @@ Thosbook/
 ├── tailwind.config.js           # ไฟล์ตั้งค่า Tailwind CSS (ES Module Export)  
 │  
 ├── css/  
-│   └── theme.css                # ไฟล์สไตล์ CSS หลัก Custom Theme & Override  
+│   └── theme.css                # ไฟล์สไตล์ CSS หลัก Custom Theme & Override (รวม Tailwind Directives)  
 │  
 ├── src/                         # โครงสร้างหลัก React Components & State  
+│   ├── main.jsx                 # Entry Point หลักของ React SPA รวม Provider และ Global Styles  
 │   ├── context/  
 │   │   └── ThosbookContext.jsx  # Context API Provider จัดการ Global State, CRUD Operations & In-Memory TTL Cache  
 │   ├── components/  
@@ -88,8 +90,8 @@ Thosbook/
 │  
 ├── js/  
 │   └── core/  
-│       ├── config.js            # ไฟล์กำหนดค่าส่วนกลาง (ดึง VITE_API_BASE_URL, Constants)  
-│       ├── api.js               # Centralized Service Layer พร้อม Error Handling, Timeout, Borrow/Return Services  
+│       ├── config.js            # ไฟล์กำหนดค่าส่วนกลาง (รองรับ VITE_API_BASE_URL, GAS_API_URL, API_BASE_URL)  
+│       ├── api.js               # Centralized Service Layer พร้อม fetchApi, Timeout, Named/Default Exports  
 │       └── auth.js              # ระบบจัดการ Authentication, Session & LocalStorage  
 │  
 └── legacy_archive/              # โฟลเดอร์เก็บไฟล์ Legacy เดิมฝั่ง Vanilla JS ที่ทำการ Sunset เรียบร้อยแล้ว  

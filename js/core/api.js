@@ -1,6 +1,7 @@
 import { API_BASE_URL } from './config.js';
 
-const GAS_API_URL = API_BASE_URL;
+//const GAS_API_URL = API_BASE_URL;
+const GAS_API_URL = '/api/gas-proxy'; // เรียก proxy ของตัวเอง แทนการยิงตรงไป script.google.com
 const TIMEOUT_MS = 10000;
 
 /**

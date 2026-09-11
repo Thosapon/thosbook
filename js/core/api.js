@@ -1,3 +1,7 @@
+import { API_BASE_URL } from './config.js';
+// กำหนด GAS_API_URL จาก config
+const GAS_API_URL = API_BASE_URL;
+
 // 1. ประกาศตัวแปรและ Export Named Export ในชื่อ ThosbookAPI
 export const ThosbookAPI = {
   async get(action) {

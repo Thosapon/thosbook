@@ -1,6 +1,46 @@
 import { API_BASE_URL } from './config.js';
-// กำหนด GAS_API_URL จาก config
+
 const GAS_API_URL = API_BASE_URL;
+const TIMEOUT_MS = 10000;
+
+/**
+ * Centralized Fetch Wrapper พร้อม AbortController Timeout & Standardized Response Format
+ */
+async function fetchApi(url, options = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error! Status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return {
+      success: result.success ?? true,
+      data: result.data ?? result,
+      error: null
+    };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    const errorMessage = err.name === 'AbortError' 
+      ? 'การเชื่อมต่อหมดเวลา (Timeout)' 
+      : (err.message || 'ไม่สามารถเชื่อมต่อระบบได้');
+      
+    return {
+      success: false,
+      data: null,
+      error: errorMessage
+    };
+  }
+}
 
 // 1. ประกาศตัวแปรและ Export Named Export ในชื่อ ThosbookAPI
 export const ThosbookAPI = {

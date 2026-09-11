@@ -2,6 +2,11 @@
  * Thosbook - Design System & Custom Overrides
  */
 
+/* css/theme.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ==========================================
    1. DESIGN SYSTEM VARIABLES
    ========================================== */

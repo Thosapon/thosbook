@@ -1,7 +1,7 @@
 // src/views/DashboardView.jsx
 import React, { useState } from 'react';
 import { useThosbook } from '../context/ThosbookContext.jsx';
-import { BookCard } from '../components/BookCard.jsx';
+import BookCard from '../components/BookCard.jsx';
 import { BorrowReturnModal } from '../components/BorrowReturnModal.jsx';
 import { NotificationBadge } from '../components/NotificationBadge.jsx';
 
